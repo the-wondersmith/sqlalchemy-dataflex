@@ -4,10 +4,9 @@ from .base import dfChar, dfDate, dfInt, dfDecimal
 
 import pyodbc
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
-pyodbc.pooling = False  # Unchanged from SQLAlchemy-Access, doesn't seem to break anything
-
+pyodbc.pooling = False  # required for DataFlex databases with ODBC linked tables
 _registry.register(
     "dataflex.pyodbc", "sqlalchemy_dataflex.pyodbc", "DataFlexDialect_pyodbc"
 )

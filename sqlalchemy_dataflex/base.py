@@ -20,7 +20,7 @@ from datetime import date, time, datetime
 from decimal import Decimal
 
 import pyodbc
-
+from pprint import pprint
 
 # These are relatively simple, as the underlying DataFlex driver only *really* supports
 # 'DECIMAL', 'CHAR', 'DATE', and 'INTEGER' datatypes using the v3 driver or
@@ -48,8 +48,6 @@ dfChar = dfCHAR
 dfDate = dfDATE
 dfInt = dfINTEGER
 
-# These are the "release notes" detailing what the driver does and does not support
-#
 # Only ODBC Core Level SQL is supported.
 # Only ODBC Level 2 API calls are supported.
 # ODBC Version 3.0 compliant.
@@ -78,17 +76,47 @@ ischema_names = {
 
 
 class DataFlexExecutionContext(default.DefaultExecutionContext):
-    # TODO: This probably needs to be changed to whatever would actually work for DF
 
     def get_lastrowid(self):
-        self.cursor.execute("SELECT @@identity AS lastrowid")
-        return self.cursor.fetchone()[0]
+        # The DF driver doesn't properly return the new RECORD_NUMBER for any
+        # newly inserted row, nor does it support any sort of "context" query
+        # Instead, we'll have to emit a second query to populate the created
+        # object's RECORD_NUMBER correctly
+        #
+        # This is probably not the *best* idea, because there's no real UNIQUE constraints
+        # on the DF tables, so there's no *real* gurantee that we're getting the right RECORD_NUMBER
+        # But hopefully it won't cause issues
+        if all([not self.executemany, self.isinsert]):
+            table_name = list((str(self.compiled.string).replace("INSERT INTO ", "")).split())[0]
+            post_fetch_query = f"""SELECT RECORD_NUMBER FROM {table_name} WHERE """
+            vals = list()
+            for k, v in self.compiled_parameters[0].items():
+                if isinstance(v, str):
+                    safe_val = v.replace("'", "''")
+                    vals.append(f"{k} = '{safe_val}'")
+                elif isinstance(v, (int, float, )):
+                    vals.append(f"{k} = {v}")
+                elif isinstance(v, (datetime, date, )):
+                    vals.append(f"{k} = " +"{d '" + f"{v.isoformat()}'" + "}")
+            post_fetch_query += " AND ".join(vals)
+            # print(f"Fetching last row w/ query:\n{post_fetch_query}\n")
+            ids = self.cursor.execute(post_fetch_query).fetchall()
+            # This max call *might* help return the correct ID when multiple IDs are found
+            ret_val = max([x[0] for x in ids])
+            # print(f"Got:\t{ids}\nReturning:\t{ret_val}")
+            return ret_val
+
+        else:
+            if self.isdelete:
+                print("Tried to run a post-delete LastRowId")
+            elif self.isupdate:
+                print("Tried to run a post-update LastRowId")
+            elif self.is_crud:
+                print("Tried to run a post-crud LastRowId")
+            return None
 
 
 class DataFlexCompiler(compiler.SQLCompiler):
-
-    # TODO: A lot of this class is relatively unchanged from SQLA-Access, but probably should be
-
     extract_map = compiler.SQLCompiler.extract_map.copy()
     extract_map.update(
         {
@@ -127,6 +155,13 @@ class DataFlexCompiler(compiler.SQLCompiler):
         else:
             return compiler.SQLCompiler.get_select_precolumns(self, select, **kw)
 
+    def visit_fromclause(self, fromclause, **kwargs):
+        pprint("\nFROM_CLAUSE triggered!")
+        print(f"From Clause:\t{fromclause}")
+        pprint(kwargs)
+        print("-------\n\n")
+        super(DataFlexCompiler, self).visit_fromclause(self, fromclause, **kwargs)
+
     def limit_clause(self, select, **kw):
         """Limit in access is after the select keyword"""
         return ""
@@ -146,8 +181,6 @@ class DataFlexCompiler(compiler.SQLCompiler):
         "current_timestamp": "now",
         "length": "len",
     }
-
-    # The driver only supports these function calls
 
     supported_functions = [
         # String functions
@@ -219,11 +252,8 @@ class DataFlexCompiler(compiler.SQLCompiler):
 
     def visit_function(self, func, **kwargs):
         """DataFlex functions are barely supported and are invoked
-        differently from most other SQL dialects. Rewrite the ones that are supported
+        differently from most other SQL dialects. Rewrite the ones that are suppored
         """
-
-        # The FlexODBC driver requires function calls to be wrapped thusly:
-        # {fn FUNCTION(parameter)}
 
         if func.name.upper() in self.supported_functions:
             disp = getattr(self, "visit_%s_func" % func.name.lower(), None)
@@ -274,8 +304,6 @@ class DataFlexCompiler(compiler.SQLCompiler):
 
     def for_update_clause(self, select, **kw):
         """FOR UPDATE is not supported by Access; silently ignore"""
-        # This is unchanged from SQLA-Access, but I don't think DF actually supports
-        # FOR UPDATE anyway, so there's no point in messing with it
         return ""
 
     # Strip schema
@@ -286,11 +314,16 @@ class DataFlexCompiler(compiler.SQLCompiler):
             return ""
 
     def visit_join(self, join, asfrom=False, **kw):
-        """Silently ignore JOINs
-        """
-        # TODO: DataFlex actually does support joins, but the syntax is finicky,
-        #       so this will need to be revisited
-        return ""
+        # return (
+        #     "("
+        #     + self.process(join.left, asfrom=True)
+        #     + (join.isouter and " LEFT OUTER JOIN " or " INNER JOIN ")
+        #     + self.process(join.right, asfrom=True)
+        #     + " ON "
+        #     + self.process(join.onclause)
+        #     + ")"
+        # )
+        return ""  # DataFlex doesn't actually support joins
 
     def visit_extract(self, extract, **kw):
         field = self.extract_map.get(extract.field, extract.field)
@@ -313,10 +346,10 @@ class DataFlexCompiler(compiler.SQLCompiler):
 
 class DataFlexTypeCompiler(compiler.GenericTypeCompiler):
     # The underlying DataFlex driver *really* doesn't support much
-    # in the way of datatypes, so this may be entirely perfunctory
+    # in the way of datatypes, so this may be entirely perfuctory
     #
-    # It's being done anyway to keep this library as in-line with
-    # sqlalchemy-access as possible, as this library is a shameless
+    # It's being done anyway to keep this libary as in-line with
+    # sqlalchemy-access as possible, as this libary is a shameless
     # ripoff of sqlalchemy-access
 
     def visit_DECIMAL(self, type_, **kw):
@@ -331,13 +364,23 @@ class DataFlexTypeCompiler(compiler.GenericTypeCompiler):
     def visit_INTEGER(self, type_, **kw):
         return dfINTEGER.__visit_name__
 
+    # def visit_date(self, type_, **kw):
+    #     return self.visit_DATE(type_, **kw)
+    #
+    # def visit_time(self, type_, **kw):
+    #     return self.visit_TIME(type_, **kw)
+    #
+    # def visit_datetime(self, type_, **kw):
+    #     return self.visit_DATETIME(type_, **kw)
+    #
+    # def visit_TIMESTAMP(self, type_, **kw):
+    #     return self.visit_DATE(type_, **kw)
+
 
 class DataFlexDDLCompiler(compiler.DDLCompiler):
     def get_column_specification(self, column, **kw):
         if column.table is None:
             raise exc.CompileError(
-                # This message has only been update to say DataFlex instead of Access
-                # I'm not sure that it's actually accurate
                 "DataFlex requires Table-bound columns in order to generate DDL"
             )
 
@@ -370,8 +413,7 @@ class DataFlexDDLCompiler(compiler.DDLCompiler):
 
 class DataFlexIdentifierPreparer(compiler.IdentifierPreparer):
     reserved_words = compiler.RESERVED_WORDS.copy()
-
-    # This list is taken directly from the FlexODBC v4 Help File
+    # FlexODBC v4 Help File
     reserved_words.update(
         [
             "ABSOLUTE",
@@ -601,7 +643,7 @@ class DataFlexIdentifierPreparer(compiler.IdentifierPreparer):
 
     def __init__(self, dialect):
         super(DataFlexIdentifierPreparer, self).__init__(
-            dialect, initial_quote="", final_quote=""
+            dialect, initial_quote="", final_quote="", escape_quote="'"
         )
 
 
@@ -616,7 +658,7 @@ class DataFlexDialect(default.DefaultDialect):
     inline_comments = False
     supports_right_nested_joins = False
 
-    postfetch_lastrowid = False
+    postfetch_lastrowid = True
 
     supports_sane_rowcount = False
     supports_sane_multi_rowcount = False
@@ -752,10 +794,10 @@ class DataFlexDialect(default.DefaultDialect):
         return result
 
     def get_primary_keys(self, connection, table_name, schema=None, **kw):
-        return []  # DataFlex doesn't *really* support primary keys
+        return []  # DataFlex doesn't *really* support promary keys
 
     def get_pk_constraint(self, connection, table_name, schema=None, **kw):
-        return []  # DataFlex doesn't *really* support primary keys
+        return []  # DataFlex doesn't *really* support promary keys
 
     def get_foreign_keys(self, connection, table_name, schema=None, **kw):
         return (
@@ -786,10 +828,11 @@ class DataFlexDialect(default.DefaultDialect):
             if len(chunk[1]) > 0:
                 formatted_statement += chunk[1]
             if chunk[0] < len(parameters):
+                if isinstance(parameters[chunk[0]], type(None)):
+                    formatted_statement += f"''"
 
-                # If the parameter to be inserted is a string, enclose it in single quotes
-                # If the parameter to be quotes already contains a single quote, quote that too
-                if isinstance(parameters[chunk[0]], str):
+                # If the paramter to be inserted is a string, enclose it in single quotes
+                elif isinstance(parameters[chunk[0]], str):
                     safe = parameters[chunk[0]].strip().replace("'", "''")
                     formatted_statement += f"'{safe}'"
 
@@ -815,14 +858,16 @@ class DataFlexDialect(default.DefaultDialect):
                     )
 
         # The DF driver doesn't support TOP or LIMIT constraints, but I'm not sure
-        # where (other than here) is the best place to remove the generated TOP constraints
+        # where (other than here) is the best place to remove the generated TOP contraints
         #
         # This probably does technically break *something*, but in practice it hasn't affected
         # anything that wouldn't have thrown an error due to something else anyway
         formatted_statement = sub(r"SELECT TOP \d* ", r"SELECT ", formatted_statement)
 
-        # Unquote this if you need to see the actual formatted query passed to the DF driver
-        # Useful for testing / bug hunting / query fixing
+        # print("Parameters:")
+        # pprint(parameters)
+        # print("----")
         # print(f"Formatted Statement:\n{formatted_statement}\n")
+        # print("----\n\n")
 
         cursor.execute(formatted_statement)

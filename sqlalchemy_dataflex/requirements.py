@@ -3,10 +3,6 @@ from sqlalchemy.testing.requirements import SuiteRequirements
 from sqlalchemy.testing import exclusions
 
 
-# This entire file is more or less unaltered from the original SQLAlchemy-Access version
-# Only a few notes are added
-
-
 class Requirements(SuiteRequirements):
     @property
     def bound_limit_offset(self):
@@ -30,13 +26,13 @@ class Requirements(SuiteRequirements):
 
     @property
     def nullable_booleans(self):
-        """Target database doesn't support boolean columns"""
-        # DataFlex doesn't support booleans at all really
+        """Target database allows boolean columns to store NULL."""
+        # Access Yes/No doesn't allow null
         return exclusions.closed()
 
     @property
     def offset(self):
-        # ADataFlex doesn't support LIMIT, TOP, or OFFSET
+        # Access does LIMIT (via TOP) but not OFFSET
         return exclusions.closed()
 
     @property
@@ -83,7 +79,8 @@ class Requirements(SuiteRequirements):
     def unicode_ddl(self):
         # DataFlex ODBC does not support `SQLForeignKeys` so test teardown code
         # cannot determine the correct order in which to drop the tables.
-        # And even if it did, DataFlex won't really let you drop a table anyway
+        # And even if it did, DataFlex won't let you drop a child table unless
+        # you drop the FK constraint first. Not worth the grief.
         return exclusions.closed()
 
     @property
