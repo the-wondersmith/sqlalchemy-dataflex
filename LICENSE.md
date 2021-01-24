@@ -1,10 +1,10 @@
 This library is derived almost in its entirety from its parent work:
-SQLALchemy and SQLAlchemy-Access. This library is provided for use,
+SQLAlchemy and SQLAlchemy-Access. This library is provided for use,
 distribution, and modification subject to the same license as those
 parent works. See the licenses included with those libraries for any
 grants of use, distribution, or modification.
 
-The SQLALchemy library is Copyright 2005-2019 SQLAlchemy authors and
+The SQLAlchemy library is Copyright 2005-2021 SQLAlchemy authors and
 contributors <see AUTHORS file>.
 
 Permission is hereby granted, free of charge, to any person obtaining a
