@@ -13,8 +13,10 @@ softwares. It is designed for use with the ODBC driver available from
 ## Pre-requisites
 
 - The [FlexODBC driver](https://www.flextools.com/flexodbc) from
-  [FlexQuarters](http://flexquarters.com/). The library was written and
-  tested against v3, but it *should* work with v4 as well.
+  [FlexQuarters](http://flexquarters.com/). ~~The library was written and
+  tested against v3, but it *should* work with v4 as well.~~ The library
+  has been re-written from the ground up and tested to work against the
+  latest available version of FlexODBC (4.0.27.2).
 
 - 32-bit Python. Neither of the available FlexODBC driver versions
   support or come in a 64-bit version.
@@ -82,11 +84,11 @@ request.
 This library technically *works*, but it isn't feature-complete so to
 speak. The FlexODBC driver only supports a very limited subset of SQL
 commands and queries, and doesn't always respond to pyodbc's
-`get_info()` inquiries the way that pyodbc is expecting. For example,
-when queried about its `SQL_BIGINT` support, it returns a value of `-5`.
-You can see the complete list of the way it responds to all of the
-available pyodbc `get_info()` inquiries
-[here](./flexodbc_capabilities.json).
+`get_info()` inquiries the way that pyodbc is expecting. You can see
+the complete list of the way it responds to all of the available pyodbc
+`get_info()` inquiries [here](./flexodbc_capabilities.json). If you are
+interested in which features are currently lacking or absent in the dialect,
+see the notes and comments littered throughout the testing suite [here](./test/test_suite.py).
 
 ## License
 
@@ -96,5 +98,5 @@ SQLAlchemy-Access library written by
 that SQLAlchemy-access is distributed under the
 [MIT license](https://opensource.org/licenses/MIT), this library is
 subject to the same licensure and grant of rights as its parent works
-[SQLALchemy](https://www.sqlalchemy.org/) and
+[SQLAlchemy](https://www.sqlalchemy.org/) and
 [SQLAlchemy-Access](https://github.com/sqlalchemy/sqlalchemy-access).
