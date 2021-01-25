@@ -1,0 +1,3 @@
+#REPLACE FILE6 foo
+#REPLACE foo.Recnum |FN6,0
+#REPLACE foo.one |FS6,1

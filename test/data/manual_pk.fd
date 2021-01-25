@@ -1,0 +1,4 @@
+#REPLACE FILE8 manual_pk
+#REPLACE manual_pk.Recnum |FN8,0
+#REPLACE manual_pk.id |FN8,1
+#REPLACE manual_pk.data |FS8,2

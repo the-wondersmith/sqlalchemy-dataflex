@@ -1,0 +1,4 @@
+#REPLACE FILE9 plain_pk
+#REPLACE plain_pk.Recnum |FN9,0
+#REPLACE plain_pk.id |FN9,1
+#REPLACE plain_pk.data |FS9,2

@@ -1,0 +1,26 @@
+-----------------------------------------------------------------------------
+  DATE: 01/19/2021      TIME: 13:07                                  PAGE:  1
+  FILE DEFINITION FOR FILE: integer_table (# 7)
+-----------------------------------------------------------------------------
+  DRIVER NAME               : DATAFLEX
+  FILE ROOT NAME            : integer_table
+  USER DISPLAY NAME         : integer_table
+  DATAFLEX FILE NAME        : integer_table
+-----------------------------------------------------------------------------
+  RECORD LENGTH             : 20        ( USED: 20 )
+  MAX NUMBER OF RECORDS     : 10000     ( USED: 0 )
+  FILE COMPRESSION          : NONE
+  RE-USE DELETED SPACE      : YES
+  LOCKING TYPE              : FILE
+  HEADER INTEGRITY CHECKING : YES
+  TRANSACTION TYPE          : CLIENT ATOMIC
+  RECORD IDENTITY INDEX     : 0 ( 0 , 0 )
+  FILE LOGIN PARAMETER      : 
+  SYSTEM FILE               : NO 
+-----------------------------------------------------------------------------
+
+NUM  FIELD NAME       TYPE SIZE  OFFST IX   RELATES TO FILE.FIELD
+---  ---------------  ---- ----- ----- --   ---------------------------------
+  1  id               NUM   14.6     1      
+  2  integer_data     NUM   14.6    11      
+

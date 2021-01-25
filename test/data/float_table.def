@@ -1,0 +1,25 @@
+-----------------------------------------------------------------------------
+  DATE: 01/13/2021      TIME: 14:48                                  PAGE:  1
+  FILE DEFINITION FOR FILE: float_table (# 14)
+-----------------------------------------------------------------------------
+  DRIVER NAME               : DATAFLEX
+  FILE ROOT NAME            : float_table
+  USER DISPLAY NAME         : float_table
+  DATAFLEX FILE NAME        : float_table
+-----------------------------------------------------------------------------
+  RECORD LENGTH             : 8         ( USED: 2 )
+  MAX NUMBER OF RECORDS     : 10000     ( USED: 0 )
+  FILE COMPRESSION          : NONE
+  RE-USE DELETED SPACE      : YES
+  LOCKING TYPE              : NONE
+  HEADER INTEGRITY CHECKING : YES
+  TRANSACTION TYPE          : NONE
+  RECORD IDENTITY INDEX     : 0 ( 0 , 0 )
+  FILE LOGIN PARAMETER      : 
+  SYSTEM FILE               : NO 
+-----------------------------------------------------------------------------
+
+NUM  FIELD NAME       TYPE SIZE  OFFST IX   RELATES TO FILE.FIELD
+---  ---------------  ---- ----- ----- --   ---------------------------------
+  1  x                NUM    2.2     1      
+

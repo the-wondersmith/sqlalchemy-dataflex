@@ -1,0 +1,4 @@
+#REPLACE FILE20 unicode_table
+#REPLACE unicode_table.Recnum |FN20,0
+#REPLACE unicode_table.id |FN20,1
+#REPLACE unicode_table.unicode_data |FS20,2

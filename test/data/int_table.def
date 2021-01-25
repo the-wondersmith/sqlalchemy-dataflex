@@ -1,0 +1,25 @@
+-----------------------------------------------------------------------------
+  DATE: 01/13/2021      TIME: 14:48                                  PAGE:  1
+  FILE DEFINITION FOR FILE: int_table (# 17)
+-----------------------------------------------------------------------------
+  DRIVER NAME               : DATAFLEX
+  FILE ROOT NAME            : int_table
+  USER DISPLAY NAME         : int_table
+  DATAFLEX FILE NAME        : int_table
+-----------------------------------------------------------------------------
+  RECORD LENGTH             : 8         ( USED: 1 )
+  MAX NUMBER OF RECORDS     : 10000     ( USED: 0 )
+  FILE COMPRESSION          : NONE
+  RE-USE DELETED SPACE      : YES
+  LOCKING TYPE              : NONE
+  HEADER INTEGRITY CHECKING : YES
+  TRANSACTION TYPE          : NONE
+  RECORD IDENTITY INDEX     : 0 ( 0 , 0 )
+  FILE LOGIN PARAMETER      : 
+  SYSTEM FILE               : NO 
+-----------------------------------------------------------------------------
+
+NUM  FIELD NAME       TYPE SIZE  OFFST IX   RELATES TO FILE.FIELD
+---  ---------------  ---- ----- ----- --   ---------------------------------
+  1  x                NUM    2.0     1      
+

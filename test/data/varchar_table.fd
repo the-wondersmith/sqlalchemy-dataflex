@@ -1,0 +1,3 @@
+#REPLACE FILE15 varchar_table
+#REPLACE varchar_table.Recnum |FN15,0
+#REPLACE varchar_table.x |FS15,1

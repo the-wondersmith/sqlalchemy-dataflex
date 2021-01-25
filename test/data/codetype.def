@@ -1,0 +1,32 @@
+-----------------------------------------------------------------------------
+  DATE: 01/11/2021      TIME: 17:24                                  PAGE:  1
+  FILE DEFINITION FOR FILE: CodeType (# 253)
+-----------------------------------------------------------------------------
+  DRIVER NAME               : DATAFLEX
+  FILE ROOT NAME            : CodeType
+  USER DISPLAY NAME         : Code Maintenance Type Table
+  DATAFLEX FILE NAME        : CodeType
+-----------------------------------------------------------------------------
+  RECORD LENGTH             : 1152      ( USED: 1064 )
+  MAX NUMBER OF RECORDS     : 10000     ( USED: 0 )
+  FILE COMPRESSION          : NONE
+  RE-USE DELETED SPACE      : YES
+  LOCKING TYPE              : FILE
+  HEADER INTEGRITY CHECKING : YES
+  TRANSACTION TYPE          : CLIENT ATOMIC
+  RECORD IDENTITY INDEX     : 0 ( 0 , 0 )
+  FILE LOGIN PARAMETER      : 
+  SYSTEM FILE               : NO 
+-----------------------------------------------------------------------------
+
+NUM  FIELD NAME       TYPE SIZE  OFFST IX   RELATES TO FILE.FIELD
+---  ---------------  ---- ----- ----- --   ---------------------------------
+  1  Type             ASC     10     1  1   
+  2  Description      ASC     30    11      
+  3  Comment          TEX   1024    41      
+
+
+INDEX# FIELDS          DES U/C    LENGTH LEVELS SEGMENTS MODE
+------ --------------- --- ---    ------ ------ -------- -------
+  1    Type            NO  YES      10     3       1     ON-LINE
+

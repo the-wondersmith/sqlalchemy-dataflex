@@ -1,0 +1,4 @@
+#REPLACE FILE5 date_table
+#REPLACE date_table.Recnum |FN5,0
+#REPLACE date_table.id |FN5,1
+#REPLACE date_table.date_data |FD5,2

@@ -1,0 +1,31 @@
+-----------------------------------------------------------------------------
+  DATE: 01/14/2021      TIME: 18:25                                  PAGE:  1
+  FILE DEFINITION FOR FILE: date_time_table (# 4)
+-----------------------------------------------------------------------------
+  DRIVER NAME               : DATAFLEX
+  FILE ROOT NAME            : date_time_table
+  USER DISPLAY NAME         : date_time_table
+  DATAFLEX FILE NAME        : date_time_table
+-----------------------------------------------------------------------------
+  RECORD LENGTH             : 34        ( USED: 33 )
+  MAX NUMBER OF RECORDS     : 10000     ( USED: 14 )
+  FILE COMPRESSION          : NONE
+  RE-USE DELETED SPACE      : YES
+  LOCKING TYPE              : FILE
+  HEADER INTEGRITY CHECKING : YES
+  TRANSACTION TYPE          : CLIENT ATOMIC
+  RECORD IDENTITY INDEX     : 0 ( 0 , 0 )
+  FILE LOGIN PARAMETER      : 
+  SYSTEM FILE               : NO 
+-----------------------------------------------------------------------------
+
+NUM  FIELD NAME       TYPE SIZE  OFFST IX   RELATES TO FILE.FIELD
+---  ---------------  ---- ----- ----- --   ---------------------------------
+  1  id               NUM    2.0     1  1   
+  2  date_data        TEX     32     2      
+
+
+INDEX# FIELDS          DES U/C    LENGTH LEVELS SEGMENTS MODE
+------ --------------- --- ---    ------ ------ -------- -------
+  1    id              NO  NO       1      2       1     ON-LINE
+

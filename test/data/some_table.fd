@@ -1,0 +1,9 @@
+#REPLACE FILE12 some_table
+#REPLACE some_table.Recnum |FN12,0
+#REPLACE some_table.id |FN12,1
+#REPLACE some_table.q |FS12,2
+#REPLACE some_table.p |FS12,3
+#REPLACE some_table.x |FN12,4
+#REPLACE some_table.y |FN12,5
+#REPLACE some_table.z |FS12,6
+#REPLACE some_table.data |FS12,7

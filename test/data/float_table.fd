@@ -1,0 +1,3 @@
+#REPLACE FILE14 float_table
+#REPLACE float_table.Recnum |FN14,0
+#REPLACE float_table.x |FN14,1

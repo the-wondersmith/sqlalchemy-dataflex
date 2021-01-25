@@ -1,0 +1,27 @@
+-----------------------------------------------------------------------------
+  DATE: 01/13/2021      TIME: 14:42                                  PAGE:  1
+  FILE DEFINITION FOR FILE: boolean_table (# 3)
+-----------------------------------------------------------------------------
+  DRIVER NAME               : DATAFLEX
+  FILE ROOT NAME            : boolean_table
+  USER DISPLAY NAME         : boolean_table
+  DATAFLEX FILE NAME        : boolean_table
+-----------------------------------------------------------------------------
+  RECORD LENGTH             : 17        ( USED: 3 )
+  MAX NUMBER OF RECORDS     : 10000     ( USED: 0 )
+  FILE COMPRESSION          : NONE
+  RE-USE DELETED SPACE      : YES
+  LOCKING TYPE              : NONE
+  HEADER INTEGRITY CHECKING : YES
+  TRANSACTION TYPE          : NONE
+  RECORD IDENTITY INDEX     : 0 ( 0 , 0 )
+  FILE LOGIN PARAMETER      : 
+  SYSTEM FILE               : NO 
+-----------------------------------------------------------------------------
+
+NUM  FIELD NAME       TYPE SIZE  OFFST IX   RELATES TO FILE.FIELD
+---  ---------------  ---- ----- ----- --   ---------------------------------
+  1  id               NUM    2.0     1      
+  2  value            NUM    2.0     2      
+  3  uc_value         NUM    2.0     3      
+

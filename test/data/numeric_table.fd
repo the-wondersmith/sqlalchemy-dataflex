@@ -1,0 +1,3 @@
+#REPLACE FILE16 numeric_table
+#REPLACE numeric_table.Recnum |FN16,0
+#REPLACE numeric_table.x |FN16,1

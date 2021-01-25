@@ -1,0 +1,4 @@
+#REPLACE FILE2 autoinc_pk
+#REPLACE autoinc_pk.Recnum |FN2,0
+#REPLACE autoinc_pk.id |FN2,1
+#REPLACE autoinc_pk.data |FS2,2

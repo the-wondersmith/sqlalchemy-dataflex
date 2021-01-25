@@ -1,0 +1,26 @@
+-----------------------------------------------------------------------------
+  DATE: 01/13/2021      TIME: 14:45                                  PAGE:  1
+  FILE DEFINITION FOR FILE: test_table (# 19)
+-----------------------------------------------------------------------------
+  DRIVER NAME               : DATAFLEX
+  FILE ROOT NAME            : test_table
+  USER DISPLAY NAME         : test_table
+  DATAFLEX FILE NAME        : test_table
+-----------------------------------------------------------------------------
+  RECORD LENGTH             : 51        ( USED: 51 )
+  MAX NUMBER OF RECORDS     : 10000     ( USED: 0 )
+  FILE COMPRESSION          : NONE
+  RE-USE DELETED SPACE      : YES
+  LOCKING TYPE              : NONE
+  HEADER INTEGRITY CHECKING : YES
+  TRANSACTION TYPE          : NONE
+  RECORD IDENTITY INDEX     : 0 ( 0 , 0 )
+  FILE LOGIN PARAMETER      : 
+  SYSTEM FILE               : NO 
+-----------------------------------------------------------------------------
+
+NUM  FIELD NAME       TYPE SIZE  OFFST IX   RELATES TO FILE.FIELD
+---  ---------------  ---- ----- ----- --   ---------------------------------
+  1  id               NUM    2.0     1      
+  2  data             ASC     50     2      
+

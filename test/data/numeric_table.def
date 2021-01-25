@@ -1,0 +1,25 @@
+-----------------------------------------------------------------------------
+  DATE: 01/13/2021      TIME: 13:50                                  PAGE:  1
+  FILE DEFINITION FOR FILE: numeric_table (# 16)
+-----------------------------------------------------------------------------
+  DRIVER NAME               : DATAFLEX
+  FILE ROOT NAME            : numeric_table
+  USER DISPLAY NAME         : numeric_table
+  DATAFLEX FILE NAME        : numeric_table
+-----------------------------------------------------------------------------
+  RECORD LENGTH             : 10        ( USED: 10 )
+  MAX NUMBER OF RECORDS     : 10000     ( USED: 0 )
+  FILE COMPRESSION          : NONE
+  RE-USE DELETED SPACE      : YES
+  LOCKING TYPE              : FILE
+  HEADER INTEGRITY CHECKING : YES
+  TRANSACTION TYPE          : CLIENT ATOMIC
+  RECORD IDENTITY INDEX     : 0 ( 0 , 0 )
+  FILE LOGIN PARAMETER      : 
+  SYSTEM FILE               : NO 
+-----------------------------------------------------------------------------
+
+NUM  FIELD NAME       TYPE SIZE  OFFST IX   RELATES TO FILE.FIELD
+---  ---------------  ---- ----- ----- --   ---------------------------------
+  1  x                NUM   14.6     1      
+

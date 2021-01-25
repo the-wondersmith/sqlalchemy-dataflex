@@ -1,0 +1,3 @@
+#REPLACE FILE17 int_table
+#REPLACE int_table.Recnum |FN17,0
+#REPLACE int_table.x |FN17,1

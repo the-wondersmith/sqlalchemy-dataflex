@@ -1,0 +1,5 @@
+#REPLACE FILE3 boolean_table
+#REPLACE boolean_table.Recnum |FN3,0
+#REPLACE boolean_table.id |FN3,1
+#REPLACE boolean_table.value |FN3,2
+#REPLACE boolean_table.uc_value |FN3,3
