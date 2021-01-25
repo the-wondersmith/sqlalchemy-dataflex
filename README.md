@@ -31,8 +31,11 @@ place. To install separately, just:
 
 ## Installation
 
-At the time of this writing, I've not yet deemed this library suitable (read: worthy) of publication on PyPI.
-For now, you'll have to install it with:
+PyPI-published version:
+
+> `pip install -U sqlalchemy-dataflex`
+
+Absolute bleeding-edge (probably buggy):
 
 > `pip install -U git+https://github.com/the-wondersmith/sqlalchemy-dataflex`
 
@@ -47,7 +50,7 @@ containing your DataFlex `FILELIST.cfg` and `.DAT` table.
 Then, in your Python app, you can connect to the database via:
 
 ```python
-import sqlalchemy_dataflex
+from sqlalchemy_dataflex import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -57,6 +60,11 @@ super_session = sessionmaker(bind=db)
 super_session.configure(autoflush=True, autocommit=True, expire_on_commit=True)
 session = super_session()
 ```
+
+> NOTE: It is *highly* recommended that you use the datatype classes from the package itself
+>       in place of the ones that are usually imported from SQLAlchemy. The testing suite doesn't
+>       use the SQLAlchemy type classes, so any issues that might arise from their use with the dialect
+>       won't be caught by the tests.
 
 ## The SQLAlchemy Project
 
@@ -88,7 +96,7 @@ commands and queries, and doesn't always respond to pyodbc's
 the complete list of the way it responds to all of the available pyodbc
 `get_info()` inquiries [here](./flexodbc_capabilities.json). If you are
 interested in which features are currently lacking or absent in the dialect,
-see the notes and comments littered throughout the testing suite [here](./test/test_suite.py).
+see the notes and comments littered throughout the testing suite [here](./tests/test_suite.py).
 
 ## License
 
