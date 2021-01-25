@@ -5,7 +5,8 @@ from typing import Set, List, Union, Callable
 from types import FunctionType, BuiltinFunctionType, MethodType, BuiltinMethodType
 
 import sqlalchemy as sa
-from sqlalchemy.sql.compiler import GenericTypeCompiler, SQLCompiler, IdentifierPreparer
+from sqlalchemy.sql.compiler import GenericTypeCompiler, DDLCompiler, SQLCompiler, IdentifierPreparer
+from sqlalchemy.engine.default import DefaultExecutionContext, DefaultDialect
 from typing import Any, Dict, Iterable, Optional
 from unicodedata import normalize
 from string import digits, whitespace
@@ -98,6 +99,7 @@ def apply_precision_and_scale(value: str, precision: int, scale: int) -> Optiona
 # version 3 flat-files. The types below reflect that.
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences
 class Logical(sa.types.BOOLEAN):
     """A straight copy of the SQLAlchemy Boolean type."""
 
@@ -149,6 +151,7 @@ class Logical(sa.types.BOOLEAN):
         return strtobool
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences
 class LongVarChar(sa.types.VARCHAR):
     """SQLAlchemy type class for the Dataflex LongVarChar datatype."""
 
@@ -184,6 +187,7 @@ class LongVarChar(sa.types.VARCHAR):
         return process
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences
 class VarChar(sa.types.VARCHAR):
     """SQLAlchemy type class for the Dataflex VarChar datatype."""
 
@@ -219,6 +223,7 @@ class VarChar(sa.types.VARCHAR):
         return process
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences
 class Char(sa.types.CHAR):
     """A straight copy of the SQLAlchemy CHAR type."""
 
@@ -254,6 +259,7 @@ class Char(sa.types.CHAR):
         return process
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences
 class Decimal(sa.types.DECIMAL):
     """A modified copy of the SQLAlchemy Decimal type."""
 
@@ -312,6 +318,7 @@ class Decimal(sa.types.DECIMAL):
         return process
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences
 class DoublePrecision(sa.types.FLOAT):
     """SQLAlchemy type class for the Dataflex DoublePrecision datatype."""
 
@@ -373,6 +380,7 @@ class DoublePrecision(sa.types.FLOAT):
 Double = DoublePrecision
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences
 class Integer(sa.types.INTEGER):
     """A straight copy of the SQLAlchemy SmallInteger type."""
 
@@ -406,6 +414,7 @@ class Integer(sa.types.INTEGER):
 Int = Integer
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences
 class Date(sa.types.DATE):
     """A straight copy of the SQLAlchemy Date type."""
 
@@ -462,6 +471,7 @@ class Date(sa.types.DATE):
         return process
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences
 class Binary(sa.types.LargeBinary):
     """A straight copy of the SQLAlchemy Binary type."""
 
@@ -511,6 +521,7 @@ class Binary(sa.types.LargeBinary):
 ###
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences
 class BigInt(sa.types.BIGINT):
     """A Straight copy of the SQLAlchemy Integer type."""
 
@@ -544,6 +555,7 @@ class BigInt(sa.types.BIGINT):
         )
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences
 class Numeric(sa.Numeric):
     """An adaptive type for generic number-type objects.
 
@@ -693,6 +705,7 @@ class Numeric(sa.Numeric):
         return process
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences
 class Time(sa.types.TIME):
     """A straight copy of the SQLAlchemy Time type."""
 
@@ -769,6 +782,7 @@ class Time(sa.types.TIME):
         return process
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences
 class Timestamp(sa.types.TIMESTAMP):
     """A straight copy of the SQLAlchemy TIMESTAMP type."""
 
@@ -868,6 +882,7 @@ class Timestamp(sa.types.TIMESTAMP):
         return process
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences
 class LongVarBinary(sa.types.LargeBinary):
     """SQLAlchemy type class for the Dataflex LongVarBinary datatype."""
 
@@ -938,10 +953,12 @@ ischema_names = {
 }
 
 
-class DataflexTypeCompiler(sa.sql.compiler.GenericTypeCompiler):
+# noinspection PyArgumentList,PyUnresolvedReferences
+class DataflexTypeCompiler(GenericTypeCompiler):
     """Dataflex Type Compiler."""
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences
 class DataflexIdentifierPreparer(IdentifierPreparer):
     """Dataflex Identifier Preparer."""
 
@@ -1440,7 +1457,8 @@ class DataflexIdentifierPreparer(IdentifierPreparer):
         return ret_val
 
 
-class DataflexDDLCompiler(sa.sql.compiler.DDLCompiler):
+# noinspection PyArgumentList,PyUnresolvedReferences
+class DataflexDDLCompiler(DDLCompiler):
     """Dataflex DDL Compiler."""
 
     # NOTE: The FlexODBC driver doesn't actually support
@@ -1625,7 +1643,7 @@ class DataflexDDLCompiler(sa.sql.compiler.DDLCompiler):
         return ret_val
 
 
-# noinspection SqlNoDataSourceInspection,PyMethodMayBeStatic
+# noinspection SqlNoDataSourceInspection,PyMethodMayBeStatic, PyArgumentList,PyUnresolvedReferences
 class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
     """Dataflex Compiler."""
 
@@ -1715,6 +1733,24 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
         "SESSION_USER": "USER",
         # "ROLLUP": "",
         # "GROUPING SETS": "",
+    }
+    supported_convert_types = {
+        "SQL_BIT",
+        "SQL_CHAR",
+        "SQL_VARCHAR",
+        "SQL_DECIMAL",
+        "SQL_NUMERIC",
+        "SQL_REAL",
+        "SQL_FLOAT",
+        "SQL_DOUBLE",
+        "SQL_BINARY",
+        "SQL_VARBINARY",
+        "SQL_SMALLINT",
+        "SQL_INTEGER",
+        "SQL_TINYINT",
+        "SQL_TYPE_DATE",
+        "SQL_TYPE_TIME",
+        "SQL_TYPE_TIMESTAMP",
     }
 
     insert_single_values_expr: Any
@@ -1861,9 +1897,9 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
 
     def visit_function(self, func, add_to_result_map=None, **kwargs) -> str:
         """Emit properly formatted function clauses.
-        
+
         FlexODBC functions use {fn function_name(parameters)} as their syntax.
-        
+
         Example:
             SELECT
               "customer"."name",
@@ -2021,7 +2057,7 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
             try:
                 op_string = self.operators[operator_]
             except KeyError as err:
-                sa.util.compat.raise_(
+                sa.util.raise_(
                     sa.exc.UnsupportedCompilationError(self, operator_), replace_context=err,
                 )
             else:
@@ -2089,9 +2125,11 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
 
         clause = cast.clause._compiler_dispatch(self, **kwargs)
         type_clause = cast.typeclause._compiler_dispatch(self, **kwargs)
+        sql_type = f"SQL_{type_clause.split('(')[0]}"
+        ret_val = clause
 
-        # ret_val = f"CAST({clause} AS {type_clause})"
-        ret_val = "".join(("{fn CONVERT(", f"{type_clause}, {clause})", "}"))
+        if sql_type in self.supported_convert_types:
+            ret_val = "".join(("{fn CONVERT(", f"{clause}, {sql_type})", "}"))
 
         return ret_val
 
@@ -2359,18 +2397,17 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
         return ret_val
 
 
-class DataflexExecutionContext(sa.engine.default.DefaultExecutionContext):
+# noinspection PyArgumentList,PyUnresolvedReferences
+class DataflexExecutionContext(DefaultExecutionContext):
     """Dataflex Execution Context."""
 
     def get_lastrowid(self):
         """Get the id of the last inserted row."""
-        # self.cursor.execute("SELECT @@identity AS lastrowid")
-        # return self.cursor.fetchone()[0]
         super(DataflexExecutionContext, self).get_lastrowid()
 
 
-# noinspection PyArgumentList
-class DataflexDialect(sa.engine.default.DefaultDialect):
+# noinspection PyArgumentList,PyUnresolvedReferences
+class DataflexDialect(DefaultDialect):
     """Dataflex Dialect."""
 
     name = "dataflex"
