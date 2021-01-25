@@ -1,0 +1,4 @@
+#REPLACE FILE4 date_time_table
+#REPLACE date_time_table.Recnum |FN4,0
+#REPLACE date_time_table.id |FN4,1
+#REPLACE date_time_table.date_data |FS4,2

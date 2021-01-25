@@ -1,0 +1,4 @@
+#REPLACE FILE19 test_table
+#REPLACE test_table.Recnum |FN19,0
+#REPLACE test_table.id |FN19,1
+#REPLACE test_table.data |FS19,2

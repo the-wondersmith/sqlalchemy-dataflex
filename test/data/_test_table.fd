@@ -1,0 +1,4 @@
+#REPLACE FILE1 _test_table
+#REPLACE _test_table.Recnum |FN1,0
+#REPLACE _test_table.id |FN1,1
+#REPLACE _test_table.data |FS1,2

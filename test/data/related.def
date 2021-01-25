@@ -1,0 +1,26 @@
+-----------------------------------------------------------------------------
+  DATE: 01/23/2021      TIME: 16:51                                  PAGE:  1
+  FILE DEFINITION FOR FILE: related (# 10)
+-----------------------------------------------------------------------------
+  DRIVER NAME               : DATAFLEX
+  FILE ROOT NAME            : related
+  USER DISPLAY NAME         : related
+  DATAFLEX FILE NAME        : related
+-----------------------------------------------------------------------------
+  RECORD LENGTH             : 14        ( USED: 14 )
+  MAX NUMBER OF RECORDS     : 10000     ( USED: 0 )
+  FILE COMPRESSION          : NONE
+  RE-USE DELETED SPACE      : YES
+  LOCKING TYPE              : FILE
+  HEADER INTEGRITY CHECKING : YES
+  TRANSACTION TYPE          : CLIENT ATOMIC
+  RECORD IDENTITY INDEX     : 0 ( 0 , 0 )
+  FILE LOGIN PARAMETER      : 
+  SYSTEM FILE               : NO 
+-----------------------------------------------------------------------------
+
+NUM  FIELD NAME       TYPE SIZE  OFFST IX   RELATES TO FILE.FIELD
+---  ---------------  ---- ----- ----- --   ---------------------------------
+  1  id               NUM   14.0     1      quote_'_one.related_id (34,4)
+  2  related          NUM   14.0     8      
+

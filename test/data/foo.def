@@ -1,0 +1,25 @@
+-----------------------------------------------------------------------------
+  DATE: 01/13/2021      TIME: 13:50                                  PAGE:  1
+  FILE DEFINITION FOR FILE: foo (# 6)
+-----------------------------------------------------------------------------
+  DRIVER NAME               : DATAFLEX
+  FILE ROOT NAME            : foo
+  USER DISPLAY NAME         : foo
+  DATAFLEX FILE NAME        : foo
+-----------------------------------------------------------------------------
+  RECORD LENGTH             : 10112     ( USED: 10000 )
+  MAX NUMBER OF RECORDS     : 10000     ( USED: 0 )
+  FILE COMPRESSION          : NONE
+  RE-USE DELETED SPACE      : YES
+  LOCKING TYPE              : FILE
+  HEADER INTEGRITY CHECKING : YES
+  TRANSACTION TYPE          : CLIENT ATOMIC
+  RECORD IDENTITY INDEX     : 0 ( 0 , 0 )
+  FILE LOGIN PARAMETER      : 
+  SYSTEM FILE               : NO 
+-----------------------------------------------------------------------------
+
+NUM  FIELD NAME       TYPE SIZE  OFFST IX   RELATES TO FILE.FIELD
+---  ---------------  ---- ----- ----- --   ---------------------------------
+  1  one              TEX  10000     1      
+

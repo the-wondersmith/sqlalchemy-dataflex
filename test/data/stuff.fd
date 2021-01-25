@@ -1,0 +1,4 @@
+#REPLACE FILE13 stuff
+#REPLACE stuff.Recnum |FN13,0
+#REPLACE stuff.id |FN13,1
+#REPLACE stuff.data |FS13,2

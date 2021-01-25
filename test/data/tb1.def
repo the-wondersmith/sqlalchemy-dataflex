@@ -1,0 +1,27 @@
+-----------------------------------------------------------------------------
+  DATE: 01/14/2021      TIME: 15:30                                  PAGE:  1
+  FILE DEFINITION FOR FILE: tb1 (# 18)
+-----------------------------------------------------------------------------
+  DRIVER NAME               : DATAFLEX
+  FILE ROOT NAME            : tb1
+  USER DISPLAY NAME         : tb1
+  DATAFLEX FILE NAME        : tb1
+-----------------------------------------------------------------------------
+  RECORD LENGTH             : 22        ( USED: 22 )
+  MAX NUMBER OF RECORDS     : 10000     ( USED: 0 )
+  FILE COMPRESSION          : NONE
+  RE-USE DELETED SPACE      : YES
+  LOCKING TYPE              : NONE
+  HEADER INTEGRITY CHECKING : YES
+  TRANSACTION TYPE          : NONE
+  RECORD IDENTITY INDEX     : 0 ( 0 , 0 )
+  FILE LOGIN PARAMETER      : 
+  SYSTEM FILE               : NO 
+-----------------------------------------------------------------------------
+
+NUM  FIELD NAME       TYPE SIZE  OFFST IX   RELATES TO FILE.FIELD
+---  ---------------  ---- ----- ----- --   ---------------------------------
+  1  id               NUM    2.0     1      tb2.pid (30,2)
+  2  attr             NUM    2.0     2      tb2.pattr (30,3)
+  3  name             ASC     20     3      tb2.pname (30,4)
+

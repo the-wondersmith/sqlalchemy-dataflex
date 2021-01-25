@@ -1,0 +1,37 @@
+-----------------------------------------------------------------------------
+  DATE: 01/14/2021      TIME: 12:22                                  PAGE:  1
+  FILE DEFINITION FOR FILE: users (# 21)
+-----------------------------------------------------------------------------
+  DRIVER NAME               : DATAFLEX
+  FILE ROOT NAME            : users
+  USER DISPLAY NAME         : users
+  DATAFLEX FILE NAME        : users
+-----------------------------------------------------------------------------
+  RECORD LENGTH             : 8         ( USED: 7 )
+  MAX NUMBER OF RECORDS     : 10000     ( USED: 0 )
+  FILE COMPRESSION          : NONE
+  RE-USE DELETED SPACE      : YES
+  LOCKING TYPE              : NONE
+  HEADER INTEGRITY CHECKING : YES
+  TRANSACTION TYPE          : NONE
+  RECORD IDENTITY INDEX     : 0 ( 0 , 0 )
+  FILE LOGIN PARAMETER      : 
+  SYSTEM FILE               : NO 
+-----------------------------------------------------------------------------
+
+NUM  FIELD NAME       TYPE SIZE  OFFST IX   RELATES TO FILE.FIELD
+---  ---------------  ---- ----- ----- --   ---------------------------------
+  1  id               NUM    2.0     1  1   email_addresses.FIELD_2 (23,2)
+  2  test1            ASC      5     2  2   
+  3  test2            NUM    2.0     7  1   
+
+
+INDEX# FIELDS          DES U/C    LENGTH LEVELS SEGMENTS MODE
+------ --------------- --- ---    ------ ------ -------- -------
+  1    id              NO  NO       7      3       3     BATCH 
+       test2           NO  NO 
+       test1           NO  NO 
+
+  2    test1           NO  YES      6      3       2     BATCH 
+       test2           NO  NO 
+

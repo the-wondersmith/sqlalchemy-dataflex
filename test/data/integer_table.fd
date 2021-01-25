@@ -1,0 +1,4 @@
+#REPLACE FILE7 integer_table
+#REPLACE integer_table.Recnum |FN7,0
+#REPLACE integer_table.id |FN7,1
+#REPLACE integer_table.integer_data |FN7,2

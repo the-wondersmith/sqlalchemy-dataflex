@@ -1,0 +1,3 @@
+id
+remote_user_id
+email_address

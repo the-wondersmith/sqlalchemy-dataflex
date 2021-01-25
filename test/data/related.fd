@@ -1,0 +1,4 @@
+#REPLACE FILE10 related
+#REPLACE related.Recnum |FN10,0
+#REPLACE related.id |FN10,1
+#REPLACE related.related |FN10,2

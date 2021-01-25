@@ -1,0 +1,31 @@
+-----------------------------------------------------------------------------
+  DATE: 01/17/2021      TIME: 16:18                                  PAGE:  1
+  FILE DEFINITION FOR FILE: some_table (# 12)
+-----------------------------------------------------------------------------
+  DRIVER NAME               : DATAFLEX
+  FILE ROOT NAME            : some_table
+  USER DISPLAY NAME         : some_table
+  DATAFLEX FILE NAME        : some_table
+-----------------------------------------------------------------------------
+  RECORD LENGTH             : 640       ( USED: 367 )
+  MAX NUMBER OF RECORDS     : 10000     ( USED: 1 )
+  FILE COMPRESSION          : NONE
+  RE-USE DELETED SPACE      : YES
+  LOCKING TYPE              : FILE
+  HEADER INTEGRITY CHECKING : YES
+  TRANSACTION TYPE          : CLIENT ATOMIC
+  RECORD IDENTITY INDEX     : 0 ( 0 , 0 )
+  FILE LOGIN PARAMETER      : 
+  SYSTEM FILE               : NO 
+-----------------------------------------------------------------------------
+
+NUM  FIELD NAME       TYPE SIZE  OFFST IX   RELATES TO FILE.FIELD
+---  ---------------  ---- ----- ----- --   ---------------------------------
+  1  id               NUM   14.0     1      
+  2  q                ASC    100     8      
+  3  p                ASC    100   108      
+  4  x                NUM   10.0   208      
+  5  y                NUM   10.0   213      
+  6  z                ASC     50   218      
+  7  data             ASC    100   268      
+

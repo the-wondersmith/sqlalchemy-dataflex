@@ -1,0 +1,5 @@
+#REPLACE FILE11 some_int_table
+#REPLACE some_int_table.Recnum |FN11,0
+#REPLACE some_int_table.id |FN11,1
+#REPLACE some_int_table.x |FN11,2
+#REPLACE some_int_table.y |FN11,3

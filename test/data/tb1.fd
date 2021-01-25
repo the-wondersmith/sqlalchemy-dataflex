@@ -1,0 +1,5 @@
+#REPLACE FILE18 tb1
+#REPLACE tb1.Recnum |FN18,0
+#REPLACE tb1.id |FN18,1
+#REPLACE tb1.attr |FN18,2
+#REPLACE tb1.name |FS18,3
