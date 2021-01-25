@@ -1,11 +1,9 @@
 """Run SQLAlchemy's dialect testing suite against the Dataflex dialect."""
 # coding=utf-8
 
-import sys
 import pytest
 import pyodbc
 import operator
-from pathlib import Path
 from decimal import Decimal as PyDecimal
 from datetime import date, time, datetime
 from typing import Any, Dict, Union, Optional, Sequence as SequenceType
@@ -64,59 +62,6 @@ from sqlalchemy.testing.suite import InsertBehaviorTest as _InsertBehaviorTest
 from sqlalchemy.testing.suite import DateTimeTest as _DateTimeTest
 from sqlalchemy.testing.suite import ServerSideCursorsTest as _ServerSideCursorsTest
 from sqlalchemy.testing.suite import TextTest as _TextTest
-
-
-def fix_filename(fname: Union[str, Path]) -> str:
-    """Fix file paths."""
-    if not isinstance(fname, str):
-        fname = str(fname)
-
-    if fname.casefold() == "unknown":
-        return fname
-    if cl_in("site-packages", fname):
-        return "\\".join(fname.split("\\")[5:])
-    if cl_in("PycharmProjects", fname):
-        return "\\".join(fname.split("\\")[4:])
-
-    raise ValueError(f"[{fname}] not a recognized file_path!")
-
-
-def trace_calls(frame, event, arg):
-    """Trace function calls."""
-    if arg:
-        del arg
-    if event != "call":
-        return
-    co = frame.f_code
-    func_name = co.co_name
-    if any((cl_in(name, func_name) for name in ("write", "fix_filename", "__"))):
-        # Ignore write() calls from print statements
-        return
-    func_name = func_name.replace("_", "\\_")
-    func_line_no = frame.f_lineno
-    func_filename = co.co_filename
-
-    try:
-        func_filename = fix_filename(func_filename)
-    except (ValueError, TypeError, OSError):
-        pass
-
-    caller = frame.f_back
-    caller_line_no = getattr(caller, "f_lineno", "unknown")
-    caller_filename = getattr(getattr(caller, "f_code", None), "co_filename", "unknown")
-
-    try:
-        caller_filename = fix_filename(caller_filename)
-    except (ValueError, TypeError, OSError):
-        pass
-
-    if not any((cl_in("sqlalchemy", func_filename), cl_in("sqlalchemy", caller_filename))):
-        return
-
-    log_line = f"| {func_name} | {func_line_no} | {func_filename} | {caller_line_no} | {caller_filename} |"
-    with (Path().home() / "Downloads" / "trace.md").open("a+") as writer:
-        writer.write(f"\n{log_line}")
-        del writer
 
 
 class DFTestTable:
@@ -1935,8 +1880,6 @@ class NumericTest(_NumericTest):
 
         value_class = getattr(value, "value", value).__class__
 
-        assert value_class in (str, int, bool, float, None.__class__, PyDecimal, bytes)
-
         result = engine.execute(
             sa.select(columns=[value], from_obj=table)
             .limit(1)
@@ -1944,8 +1887,10 @@ class NumericTest(_NumericTest):
             .string
         ).fetchone()
 
-        if result:
+        if result and value_class in (str, int, bool, float, None.__class__, PyDecimal, bytes):
             return value_class(result[0])
+        elif result:
+            return result[0]
         return None
 
     @sa_testing.testing.emits_warning(r".*does \*not\* support Decimal objects natively")
@@ -1990,12 +1935,10 @@ class NumericTest(_NumericTest):
         val = self._get_scalar_value(sa.literal(expr))
         sa_testing.eq_(val, expr)
 
-    @pytest.mark.skip(reason="Emulation of CAST/CONVERT not currently implemented.")
     @sa_testing.testing.emits_warning(r".*does \*not\* support Decimal objects natively")
     def test_decimal_coerce_round_trip_w_cast(self):
         expr = PyDecimal("15.7563")
 
-        # val = sa_testing.testing.db.scalar(sa.select([sa.cast(expr, Numeric(10, 4))]))
         val = self._get_scalar_value(sa.cast(expr, Numeric(10, 4)))
         sa_testing.eq_(val, expr)
 
@@ -2391,10 +2334,22 @@ class SimpleUpdateDeleteTest(_SimpleUpdateDeleteTest):
         assert not result.is_insert
         assert not result.returns_rows
 
-        check_query = table.select().order_by(table.c.id)
-        check_result = sa_testing.config.db.execute(check_query).fetchall()
+        # Originally, this test included an `ORDER BY` clause on the
+        # check query, but for some reason that causes FlexODBC to
+        # crash with an `ACCESS VIOLATION` error. No error is thrown
+        # if the order by clause is omitted though, the results are
+        # just handed back in a semi-unpredictable order. To work
+        # around that, the check results and the expected results
+        # are supplied as hashed sets so that they can be compared
+        # directly for equality without having to worry about the
+        # insertion order of the respective result rows.
 
-        expected = [(1, "d1"), (3, "d3")]
+        check_query = table.select()  # .order_by(table.c.id)
+        check_result = {
+            tuple((row[pos] for pos in range(len(row)))) for row in sa_testing.config.db.execute(check_query)
+        }
+
+        expected = {(1, "d1"), (3, "d3")}
 
         assert check_result == expected
 
