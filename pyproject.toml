@@ -1,0 +1,203 @@
+[tool.poetry]
+
+name = "sqlalchemy-dataflex"
+version = "0.1.0"
+description = "A SQLAlchemy dialect for DataFlex flat-file databases."
+
+license = "AGPL-3.0-or-later"
+
+authors = ["Pawn Payment Solutions <support@pawn-pay.com>"]
+
+maintainers = ["Mark S. <mark@pawn-pay.com>"]
+
+readme = "README.md"
+
+homepage = "https://pypi.org/project/sqlalchemy-dataflex"
+documentation = "https://sqlalchemy-dataflex.readthedocs.io"
+repository = "https://github.com/the-wondersmith/sqlalchemy-dataflex.git"
+
+keywords = ["sqlalchemy", "dataflex", "odbc", "flexodbc", "dialect"]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Natural Language :: English",
+    "Operating System :: Microsoft",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: Microsoft :: Windows :: Windows 7",
+    "Operating System :: Microsoft :: Windows :: Windows 8",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows Server 2008",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Topic :: Database",
+    "Topic :: Database :: Database Engines/Servers",
+    "Topic :: Office/Business",
+    "Topic :: Other/Nonlisted Topic",
+]
+
+include = ["LICENSE.md", "AUTHORS.md", ""]
+# exclude = ["my_package/excluded.py"]
+
+[tool.poetry.dependencies]
+
+# Supported Python versions
+python = "^3.7, ^3.8, ^3.9"
+
+# Package Dependencies
+SQLAlchemy = "*"
+pyodbc = "*"
+python-dateutil = "*"
+
+[tool.poetry.dev-dependencies]
+
+# Formatting & Linting
+black = "^20.8b1"
+mypy = "*"
+sqlalchemy-stubs = "^0.3"
+pydocstyle = "*"
+pylint = "*"
+flake8 = "*"
+flake8-docstrings = "*"
+docformatter = "*"
+isort = "*"
+
+# Testing
+flaky = "*"
+freezegun = "*"
+hypothesis = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-describe = "*"
+pytest-expecter = "*"
+pytest-parallel = "*"
+pytest-random = "*"
+
+# Reports
+coveragespace = "*"
+coverage = {extras = ["toml"], version = "*"}
+
+# Documentation
+mkdocs = "*"
+pygments = "*"
+
+# Tooling
+sniffer = "*"
+ipython = "*"
+devtools = "*"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--tb native --maxfail=25 -p no:warnings --strict --pdbcls=tests:Debugger -v -r fxX --cov-config=pyproject.toml --cov-report=html --no-cov-on-fail --no-flaky-report"
+cache_dir = "./.cache"
+testpaths = [
+    "tests",
+]
+python_files= [
+    "tests/*test_*.py",
+]
+markers = [
+    "to_revisit",
+]
+
+[tool.coverage.run]
+omit = [
+    "tests/*",
+    "scratch.py",
+]
+
+[tool.poetry.plugins."sqlalchemy.dialects"]
+"paradox" = "sqlalchemy_paradox.pyodbc:ParadoxDialect_pyodbc"
+"paradox.pyodbc" = "sqlalchemy_paradox.pyodbc:ParadoxDialect_pyodbc"
+
+[tool.isort]
+atomic = true
+py_version = 38
+verbose = false
+remove_redundant_aliases = true
+ensure_newline_before_comments = true
+length_sort = true
+length_sort_sections = "true"
+color_output = true
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 118
+combine_as_imports = true
+default_section = "THIRDPARTY"
+known_first_party = ["sqlalchemy_dataflex", "sqlalchemy"]
+import_heading_future = "Future Imports"
+import_heading_stdlib = "Standard Library Imports"
+import_heading_thirdparty = "Third-Party Imports"
+import_heading_firstparty = "Project-Level Imports"
+import_heading_localfolder = "Imports From Project Sub-Modules"
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+src_paths = ["pawnpay", "tests"]
+
+[tool.black]
+
+line-length = 118
+target-version = ["py37", "py38"]
+skip-string-normalization = false
+
+[sqla_testing]
+requirement_cls = "sqlalchemy_dataflex.requirements:Requirements"
+
+[db]
+default = "dataflex+pyodbc://DSN=dataflex_testing"
+sqlite = "sqlite:///:memory:"
+
+[flake8]
+show-source = true
+enable-extensions = "G"
+# E203 is due to https://github.com/PyCQA/pycodestyle/issues/373
+ignore = [
+    "A003",
+    "D",
+    "E203",
+    "E305",
+    "E711",
+    "E712",
+    "E721",
+    "E722",
+    "E741",
+    "N801",
+    "N802",
+    "N806",
+    "RST304",
+    "RST303",
+    "RST299",
+    "RST399",
+    "W503",
+    "W504",
+]
+exclude = [
+    ".venv",
+    ".git",
+    ".tox",
+    "dist",
+    "doc",
+    "*egg",
+    "build",
+]
+import-order-style = "google"
+application-import-names = "sqlalchemy_dataflex"
+
+[mypy]
+pretty = true
+python-version = 3.8
+follow-imports = "silent"
+check-untyped-defs = true
+ignore-missing-imports = true
+cache_dir = ".cache/mypy/"
+plugins = ["sqlmypy"]
+
+[build-system]
+
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
