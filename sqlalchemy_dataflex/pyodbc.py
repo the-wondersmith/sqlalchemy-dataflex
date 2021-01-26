@@ -154,7 +154,7 @@ class DataflexDialect_pyodbc(PyODBCConnector, DataflexDialect):
             opts = dict()
             opts["host"] = url.host or url.query.get("odbc_connect", "")
 
-        if cg(opts, "host", False):
+        if cg(opts, "host", False) and cl_in("odbc_connect", cg(opts, "host", "")):
             supplied_args = {
                 pair[0]: pair[1]
                 for pair in map(
@@ -190,7 +190,7 @@ class DataflexDialect_pyodbc(PyODBCConnector, DataflexDialect):
             {
                 key: value
                 for key, value in conn_args.items()
-                if all((cl_in(key, self.arg_name_map), value is not None))
+                if all((any((cl_in(key, self.arg_name_map.keys()), cl_in(key, self.arg_name_map.values()))), value is not None))
             },
         )
 
