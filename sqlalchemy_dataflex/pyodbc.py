@@ -159,7 +159,12 @@ class DataflexDialect_pyodbc(PyODBCConnector, DataflexDialect):
                 pair[0]: pair[1]
                 for pair in map(
                     lambda entry: entry.split("="),
-                    chain.from_iterable(map(lambda item: item.split(";"), unquote_plus(opts.get("host")).split("&"))),
+                    chain.from_iterable(
+                        map(
+                            lambda item: item.split(";"),
+                            unquote_plus(opts.get("host")).replace("?odbc_connect=", "").split("&"),
+                        )
+                    ),
                 )
             }
 
