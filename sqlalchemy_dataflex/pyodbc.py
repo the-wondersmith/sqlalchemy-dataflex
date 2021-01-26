@@ -155,17 +155,16 @@ class DataflexDialect_pyodbc(PyODBCConnector, DataflexDialect):
             opts["host"] = url.host or url.query.get("odbc_connect", "")
 
         if cg(opts, "host", False):
-            supplied_args = dict(
-                map(
-                    lambda entry: entry.replace("?odbc_connect=", "").split("="),
-                    unquote_plus(opts.get("host")).split("&"),
+            supplied_args = {
+                pair[0]: pair[1]
+                for pair in map(
+                    lambda entry: entry.split("="),
+                    chain.from_iterable(map(lambda item: item.split(";"), unquote_plus(opts.get("host")).split("&"))),
                 )
-            )
+            }
 
             supplied_args = {
-                key: cg(supplied_args, key, None)
-                if not cl_in(value, supplied_args.keys())
-                else cg(supplied_args, value, None)
+                value: cg(supplied_args, key) if not cl_in(value, supplied_args.keys()) else cg(supplied_args, value)
                 for key, value in self.arg_name_map.items()
             }
 
