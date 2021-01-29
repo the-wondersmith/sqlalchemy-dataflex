@@ -1,9 +1,12 @@
 """Run SQLAlchemy's dialect testing suite against the Dataflex dialect."""
 # coding=utf-8
 
+# noinspection PyPackageRequirements
 import pytest
 import pyodbc
 import operator
+from uuid import uuid4
+from random import sample
 from decimal import Decimal as PyDecimal
 from datetime import date, time, datetime
 from typing import Any, Dict, Union, Optional, Sequence as SequenceType
@@ -11,7 +14,9 @@ from typing import Any, Dict, Union, Optional, Sequence as SequenceType
 import sqlalchemy as sa
 from itertools import chain
 from sqlalchemy_dataflex import *
-from sqlalchemy.testing import suite as sa_testing
+from sqlalchemy import orm, ext, sql
+from sqlalchemy.ext import declarative, hybrid
+from sqlalchemy.testing import fixtures, suite as sa_testing
 
 from sqlalchemy.testing.suite import ComputedReflectionTest as _ComputedReflectionTest
 from sqlalchemy.testing.suite import RowFetchTest as _RowFetchTest
@@ -64,6 +69,7 @@ from sqlalchemy.testing.suite import ServerSideCursorsTest as _ServerSideCursors
 from sqlalchemy.testing.suite import TextTest as _TextTest
 
 
+# noinspection SpellCheckingInspection
 class DFTestTable:
     """A handy organizer for the static DataFlex tables required to test the dialect."""
 
@@ -388,7 +394,11 @@ class DFTestTable:
                 self.metadata,
                 sa.Column("id", Integer, primary_key=True, nullable=True, comment="id comment"),
                 sa.Column("data", VarChar(20), comment="data % comment"),
-                sa.Column("d2", VarChar(20), comment=r"""Comment types type speedily ' " \ '' Fun!""",),
+                sa.Column(
+                    "d2",
+                    VarChar(20),
+                    comment=r"""Comment types type speedily ' " \ '' Fun!""",
+                ),
                 schema=self.schema,
                 comment=r"""the test % ' " \ table comment""",
             )
@@ -398,7 +408,12 @@ class DFTestTable:
     def noncol_idx_test_nopk(self) -> sa.Table:
         """The `noncol_idx_test_nopk` table."""
         return self._return_table(
-            sa.Table("noncol_idx_test_nopk", self.metadata, sa.Column("q", VarChar(5)), schema=self.schema,)
+            sa.Table(
+                "noncol_idx_test_nopk",
+                self.metadata,
+                sa.Column("q", VarChar(5)),
+                schema=self.schema,
+            )
         )
 
     @property
@@ -489,7 +504,11 @@ class DFTestTable:
                 sa.Column("id", Integer, primary_key=True, nullable=True, autoincrement=True),
                 sa.Column("data", VarChar(50)),
                 sa.Column("x", Integer, default=5),
-                sa.Column("y", Integer, default=sa.literal_column("2", type_=Integer) + sa.literal(2),),
+                sa.Column(
+                    "y",
+                    Integer,
+                    default=sa.literal_column("2", type_=Integer) + sa.literal(2),
+                ),
                 schema=self.schema,
             )
         )
@@ -499,7 +518,10 @@ class DFTestTable:
         """The `scalar_select` table."""
         return self._return_table(
             sa.Table(
-                "scalar_select", self.metadata, sa.Column("data", VarChar(50), nullable=True), schema=self.schema,
+                "scalar_select",
+                self.metadata,
+                sa.Column("data", VarChar(50), nullable=True),
+                schema=self.schema,
             )
         )
 
@@ -589,16 +611,20 @@ class BooleanTest(_BooleanTest):
             conn.execute(boolean_table.insert({"id": 2, "value": False, "uc_value": False}))
 
             sa_testing.eq_(
-                conn.scalar(sa.select([boolean_table.c.id]).where(boolean_table.c.value)), 1,
+                conn.scalar(sa.select([boolean_table.c.id]).where(boolean_table.c.value)),
+                1,
             )
             sa_testing.eq_(
-                conn.scalar(sa.select([boolean_table.c.id]).where(boolean_table.c.uc_value)), 1,
+                conn.scalar(sa.select([boolean_table.c.id]).where(boolean_table.c.uc_value)),
+                1,
             )
             sa_testing.eq_(
-                conn.scalar(sa.select([boolean_table.c.id]).where(~boolean_table.c.value)), 2,
+                conn.scalar(sa.select([boolean_table.c.id]).where(~boolean_table.c.value)),
+                2,
             )
             sa_testing.eq_(
-                conn.scalar(sa.select([boolean_table.c.id]).where(~boolean_table.c.uc_value)), 2,
+                conn.scalar(sa.select([boolean_table.c.id]).where(~boolean_table.c.uc_value)),
+                2,
             )
 
 
@@ -871,7 +897,8 @@ class ComponentReflectionTest(_ComponentReflectionTest):
 
         inspector = sa.inspect(orig_meta.bind)
         reflected = sorted(
-            inspector.get_unique_constraints("testtbl", schema=schema_), key=operator.itemgetter("name"),
+            inspector.get_unique_constraints("testtbl", schema=schema_),
+            key=operator.itemgetter("name"),
         )
 
         names_that_duplicate_index = set()
@@ -1381,7 +1408,17 @@ class ExpandingBoundInTest(_ExpandingBoundInTest):
 
         # noinspection PyTypeChecker
         stmt = sa.select(
-            [case([(null().in_(sa.bindparam("foo", value=(), expanding=True)), true(),)], else_=false(),)]
+            [
+                case(
+                    [
+                        (
+                            null().in_(sa.bindparam("foo", value=(), expanding=True)),
+                            true(),
+                        )
+                    ],
+                    else_=false(),
+                )
+            ]
         )
         in_(sa_testing.config.db.execute(stmt).fetchone()[0], (False, 0))
 
@@ -1673,7 +1710,8 @@ class LikeFunctionsTest(_LikeFunctionsTest):
     def test_startswith_sqlexpr(self):
         col = self.tables.some_table.c.data
         self._test(
-            col.startswith(sa.literal_column("'ab%c'")), {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+            col.startswith(sa.literal_column("'ab%c'")),
+            {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
         )
 
     def test_startswith_unescaped(self):
@@ -1843,7 +1881,10 @@ class NumericTest(_NumericTest):
                 ins = (
                     table.insert()
                     .values({"id": id_ + 1, col_name: sa.literal(value)})
-                    .compile(dialect=sa_testing.testing.db.dialect, compile_kwargs=dict(literal_binds=True),)
+                    .compile(
+                        dialect=sa_testing.testing.db.dialect,
+                        compile_kwargs=dict(literal_binds=True),
+                    )
                 )
                 conn.execute(ins)
 
@@ -1852,7 +1893,10 @@ class NumericTest(_NumericTest):
             else:
                 stmt = sa.select([getattr(table.c, col_name)])
 
-            stmt = stmt.compile(dialect=sa_testing.testing.db.dialect, compile_kwargs=dict(literal_binds=True),)
+            stmt = stmt.compile(
+                dialect=sa_testing.testing.db.dialect,
+                compile_kwargs=dict(literal_binds=True),
+            )
             for row in conn.execute(stmt):
                 value = row[0]
                 if filter_ is not None:
@@ -2051,7 +2095,9 @@ class NumericTest(_NumericTest):
     @sa_testing.testing.emits_warning(r".*does \*not\* support Decimal objects natively")
     def test_render_literal_numeric(self):
         self._literal_round_trip(
-            Numeric(precision=8, scale=4), [15.7563, PyDecimal("15.7563")], [PyDecimal("15.7563")],
+            Numeric(precision=8, scale=4),
+            [15.7563, PyDecimal("15.7563")],
+            [PyDecimal("15.7563")],
         )
 
     @sa_testing.testing.emits_warning(r".*does \*not\* support Decimal objects natively")
@@ -2155,7 +2201,10 @@ class QuotedNameArgumentTest(_QuotedNameArgumentTest):
             sa.Column("related_id", Integer),
             sa.PrimaryKeyConstraint("id", name="pk quote ' one"),
             sa.Index("ix quote ' one", "name"),
-            sa.UniqueConstraint("data", name="uq quote' one",),
+            sa.UniqueConstraint(
+                "data",
+                name="uq quote' one",
+            ),
             sa.ForeignKeyConstraint(["id"], ["related.id"], name="fk quote ' one"),
             sa.CheckConstraint("name != 'foo'", name="ck quote ' one"),
             comment=r"""quote ' one comment""",
@@ -2173,7 +2222,8 @@ class QuotedNameArgumentTest(_QuotedNameArgumentTest):
     def quote_fixtures(fn):
         """Quote a fixture."""
         return sa_testing.testing.combinations(
-            ("quote ' one",), ('quote " two', sa_testing.testing.requires.symbol_names_w_double_quote),
+            ("quote ' one",),
+            ('quote " two', sa_testing.testing.requires.symbol_names_w_double_quote),
         )(fn)
 
     @quote_fixtures
@@ -2264,8 +2314,7 @@ class RowFetchTest(_RowFetchTest):
 
     @pytest.mark.skip(reason="Scalar-SELECT-as-column unsupported by FlexODBC driver.")
     def test_row_w_scalar_select(self):
-        """Test that a scalar select as a column is returned as such and that type conversion works.
-        """
+        """Test that a scalar select as a column is returned as such and that type conversion works."""
         date_table = self.tables.has_dates
         s = sa.select([date_table.c.today.label("x")]).as_scalar()
         s2 = sa.select([date_table.c.id, s.label("somelabel")])
@@ -2437,3 +2486,150 @@ class UnicodeTextTest(_UnicodeTextTest):
 @pytest.mark.skip(reason="Unsupported by FlexODBC driver.")
 class UnicodeVarcharTest(_UnicodeVarcharTest):
     """Test the dialect's handling of unicode varchar data."""
+
+
+class JoinTest(fixtures.TablesTest):
+    """Test the dialect's handling of `JOIN` clauses."""
+
+    __backend__ = True
+
+    run_setup_bind = "once"
+    run_define_tables = "once"
+    run_create_tables = "once"
+    run_inserts = "each"
+    run_deletes = "each"
+
+    shared_ids = {1, 4, 7, 10}
+    unique_ids = {2, 3, 5, 6, 8, 9, 11, 12}
+
+    shared_data = [
+        {"id": 1, "data": "97b7b319-cdc1-42d5-90f4-5c74d1a61232"},
+        {"id": 4, "data": "0965cd3b-65bf-488c-844a-fbc14c758508"},
+        {"id": 7, "data": "abfa2747-5ec9-4492-ad8f-b294afa4b5cd"},
+        {"id": 10, "data": "69a26706-ee4c-4611-b729-954f5b4f5f86"},
+    ]
+    left_unique = [
+        {"id": 2, "data": "427a558c-c871-476e-8b62-b713580b06fa"},
+        {"id": 3, "data": "cde8d291-64ac-4eb5-8997-d8589e45c2f7"},
+        {"id": 5, "data": "d4a7d398-9141-4e99-b152-e631e245a130"},
+        {"id": 6, "data": "4db6859f-77d3-402b-a260-c830a9a0f912"},
+        {"id": 8, "data": "32d138fc-1a0b-4e07-81fa-076d6f2ed29c"},
+        {"id": 9, "data": "f3cf3344-5e76-4345-a1d7-63abb9f9b3c0"},
+        {"id": 11, "data": "7c085fa7-0082-432a-b805-d0ca5c8d100a"},
+        {"id": 12, "data": "09428162-e51b-4035-8a46-aafb95180d6d"},
+    ]
+    right_unique = [
+        {"id": 2, "data": "f1bafdb1-0f19-4930-bdac-9108e89664b0"},
+        {"id": 3, "data": "588f6d15-ceb1-4b4a-adf3-7d7d21190c19"},
+        {"id": 5, "data": "631c2d3a-3fbd-46db-8de9-811c6960f0e5"},
+        {"id": 6, "data": "cf902ce1-1f32-4e3f-a34a-f425272a7d05"},
+        {"id": 8, "data": "72330e77-04dd-4e36-bc17-c1c03b33e86f"},
+        {"id": 9, "data": "9c3a6c33-c9a5-4e0d-b70d-e66e109a57da"},
+        {"id": 11, "data": "611cea98-1e1e-48bd-95ae-02e23438a6d8"},
+        {"id": 12, "data": "62dd0da7-8962-46a7-b848-88672adfe99e"},
+    ]
+
+    @classmethod
+    def define_tables(cls, metadata) -> None:
+        """Define the table(s) required by the test(s)."""
+        df_tables = DFTestTable(metadata)
+
+        assert df_tables.stuff is not None
+        assert df_tables.manual_pk is not None
+
+    @classmethod
+    def insert_data(cls, connection) -> None:
+        """Ensure that any data required by the test(s) exists in the relevant table(s)."""
+
+        for param_set in sorted(cls.shared_data + cls.left_unique, key=lambda entry: entry.get("id")):
+            connection.execute(cls.tables.stuff.insert(param_set))
+
+        for param_set in sorted(cls.shared_data + cls.right_unique, key=lambda entry: entry.get("id")):
+            connection.execute(cls.tables.manual_pk.insert(param_set))
+
+    def test_inner_join(self) -> None:
+        # Inner Join -
+        #   Select all records from Table A and Table B, where
+        #   the join condition is met.
+
+        left_table = self.tables.stuff
+        right_table = self.tables.manual_pk
+
+        # noinspection PyTypeChecker
+        join_clause = sa.sql.expression.join(
+            left=left_table,
+            right=right_table,
+            onclause=(left_table.c.data == right_table.c.data),  # type: ignore
+            isouter=False,
+            full=False,
+        )
+        query = sa.select(
+            [
+                left_table.c.id.label("id"),
+                left_table.c.data.label("left_data"),
+                right_table.c.data.label("right_data"),
+            ]
+        ).select_from(join_clause)
+
+        expected = [
+            (1, "97b7b319-cdc1-42d5-90f4-5c74d1a61232", "97b7b319-cdc1-42d5-90f4-5c74d1a61232"),
+            (4, "0965cd3b-65bf-488c-844a-fbc14c758508", "0965cd3b-65bf-488c-844a-fbc14c758508"),
+            (7, "abfa2747-5ec9-4492-ad8f-b294afa4b5cd", "abfa2747-5ec9-4492-ad8f-b294afa4b5cd"),
+            (10, "69a26706-ee4c-4611-b729-954f5b4f5f86", "69a26706-ee4c-4611-b729-954f5b4f5f86"),
+        ]
+
+        result = sa_testing.config.db.execute(query).fetchall()
+
+        sa_testing.eq_(sorted(result, key=lambda entry: entry[0]), expected)
+        sa_testing.eq_(self.shared_ids, {entry[0] for entry in result})
+
+    def test_outer_join(self) -> None:
+        # Outer Join -
+        #   Select all records from Table A, along with records from
+        #   Table B for which the join condition is met (if at all).
+
+        left_table = self.tables.stuff
+        right_table = self.tables.manual_pk
+
+        # noinspection PyTypeChecker
+        join_clause = sa.sql.expression.join(
+            left=left_table,
+            right=right_table,
+            onclause=(left_table.c.data == right_table.c.data),  # type: ignore
+            isouter=True,
+            full=False,
+        )
+        query = sa.select(
+            [
+                left_table.c.id.label("id"),
+                left_table.c.data.label("left_data"),
+                right_table.c.data.label("right_data"),
+            ]
+        ).select_from(join_clause)
+
+        expected = [
+            (1, "97b7b319-cdc1-42d5-90f4-5c74d1a61232", "97b7b319-cdc1-42d5-90f4-5c74d1a61232"),
+            (2, "427a558c-c871-476e-8b62-b713580b06fa", ""),
+            (3, "cde8d291-64ac-4eb5-8997-d8589e45c2f7", ""),
+            (4, "0965cd3b-65bf-488c-844a-fbc14c758508", "0965cd3b-65bf-488c-844a-fbc14c758508"),
+            (5, "d4a7d398-9141-4e99-b152-e631e245a130", ""),
+            (6, "4db6859f-77d3-402b-a260-c830a9a0f912", ""),
+            (7, "abfa2747-5ec9-4492-ad8f-b294afa4b5cd", "abfa2747-5ec9-4492-ad8f-b294afa4b5cd"),
+            (8, "32d138fc-1a0b-4e07-81fa-076d6f2ed29c", ""),
+            (9, "f3cf3344-5e76-4345-a1d7-63abb9f9b3c0", ""),
+            (10, "69a26706-ee4c-4611-b729-954f5b4f5f86", "69a26706-ee4c-4611-b729-954f5b4f5f86"),
+            (11, "7c085fa7-0082-432a-b805-d0ca5c8d100a", ""),
+            (12, "09428162-e51b-4035-8a46-aafb95180d6d", ""),
+        ]
+
+        result = sa_testing.config.db.execute(query).fetchall()
+
+        sa_testing.eq_(sorted(result, key=lambda entry: entry[0]), expected)
+        sa_testing.eq_(self.shared_ids.union(self.unique_ids), {entry[0] for entry in result})
+        sa_testing.eq_(
+            {entry[1] for entry in result},
+            {entry.get("data") for entry in self.shared_data}.union(
+                {entry.get("data") for entry in self.left_unique}
+            ),
+        )
+        sa_testing.eq_({entry[2] for entry in result if entry[0] not in self.shared_ids}, {""})
