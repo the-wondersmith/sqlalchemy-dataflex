@@ -26,7 +26,7 @@ from .base import (
     DoublePrecision,
 )
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 pyodbc.pooling = True  # Makes the ODBC overhead a little more manageable
 _registry.register("dataflex.pyodbc", "sqlalchemy_dataflex.pyodbc", "DataflexDialect_pyodbc")
