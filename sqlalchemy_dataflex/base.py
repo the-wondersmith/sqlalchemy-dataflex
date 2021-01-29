@@ -1770,7 +1770,12 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
 
         return any(
             (
-                all((select._offset_clause is None, getattr(select, "_limit_clause", None) is not None,)),
+                all(
+                    (
+                        select._offset_clause is None,
+                        getattr(select, "_limit_clause", None) is not None,
+                    )
+                ),
                 all((simple_int_clause(getattr(select, "_limit_clause", None)), not select._offset)),
             )
         )
@@ -1973,7 +1978,10 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
         if render_label_with_as:
             if add_to_result_map is not None:
                 add_to_result_map(
-                    label_name, label.name, (label, label_name) + label._alt_names, label.type,
+                    label_name,
+                    label.name,
+                    (label, label_name) + label._alt_names,
+                    label.type,
                 )
 
             element = label.element._compiler_dispatch(
@@ -2058,7 +2066,8 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
                 op_string = self.operators[operator_]
             except KeyError as err:
                 sa.util.raise_(
-                    sa.exc.UnsupportedCompilationError(self, operator_), replace_context=err,
+                    sa.exc.UnsupportedCompilationError(self, operator_),
+                    replace_context=err,
                 )
             else:
                 return self._generate_generic_binary(binary, op_string, **kw)
@@ -2216,6 +2225,30 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
             ret_val = str(next(iter(self.statement.bind.engine.execute(query).fetchone() or []), "NULL"))
         else:
             ret_val = f"'{uuid4()}'"
+
+        return ret_val
+
+    def visit_join(self, join, asfrom=False, **kwargs):
+        """Emit properly formatted JOIN clauses."""
+
+        left = join.left._compiler_dispatch(self, asfrom=True, **kwargs)
+        right = join.right._compiler_dispatch(self, asfrom=True, **kwargs)
+        on_clause = join.onclause._compiler_dispatch(self, **kwargs)
+
+        # FlexODBC supported `JOIN` syntax:
+        #
+        # SELECT [columns] FROM {OJ `left` INNER JOIN `right` ON (`condition`)}
+        # SELECT [columns] FROM `left` INNER JOIN `right` ON `condition`
+        # SELECT [columns] FROM `left` LEFT OUTER JOIN `right` ON `condition`
+        #
+        # Parentheses are required when there are more than two tables being joined!!
+
+        join_type = "INNER JOIN "
+
+        if join.full or join.isouter:
+            join_type = " LEFT OUTER JOIN "
+
+        ret_val = f"{left} {join_type} {right} ON {on_clause}"
 
         return ret_val
 
@@ -2601,17 +2634,17 @@ class DataflexDialect(DefaultDialect):
         return result
 
     def get_pk_constraint(self, connection, table_name, schema=None, *args: Any, **kwargs: Any):
-        """ Return information about the primary key constraint on `table_name`.
+        """Return information about the primary key constraint on `table_name`.
 
-            Given a :class:`_engine.Connection`, a string
-            `table_name`, and an optional string `schema`, return primary
-            key information as a dictionary with these keys:
+        Given a :class:`_engine.Connection`, a string
+        `table_name`, and an optional string `schema`, return primary
+        key information as a dictionary with these keys:
 
-            constrained_columns
-              a list of column names that make up the primary key
+        constrained_columns
+          a list of column names that make up the primary key
 
-            name
-              optional name of the primary key constraint.
+        name
+          optional name of the primary key constraint.
         """
         table_name = table_name.replace(" ", "_")
         conn = connection.engine.raw_connection()
