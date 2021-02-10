@@ -165,13 +165,29 @@ class LongVarChar(sa.types.VARCHAR):
         """The equivalent Python type."""
         return str
 
-    def literal_processor(self, dialect) -> Callable[[Any], str]:
-        """Process literal binds."""
-        return lambda item: "".join(("'", str(item).strip().replace("'", "''"), "'"))
+    def literal_processor(self, dialect) -> Callable[[Any], Optional[str]]:
+        """Process literals."""
 
-    def bind_processor(self, dialect) -> Callable[[Any], bytes]:
-        """Process regular binds."""
-        return lambda item: str(item).strip().encode("ASCII")
+        def process(item: Any) -> str:
+            """Process literal binds."""
+            if any((isinstance(item, sa.sql.elements.Null), item is None)):
+                return None
+
+            return "".join(("'", str(item).strip().replace("'", "''"), "'"))
+
+        return process
+
+    def bind_processor(self, dialect) -> Callable[[Any], Optional[bytes]]:
+        """Process binds."""
+
+        def process(item: Any) -> Optional[bytes]:
+            """Process literal binds."""
+            if any((isinstance(item, sa.sql.elements.Null), item is None)):
+                return None
+
+            return str(item).strip().encode("ASCII")
+
+        return process
 
     def result_processor(self, dialect, coltype) -> Callable[[Any], str]:
         """Process query results."""
@@ -201,13 +217,29 @@ class VarChar(sa.types.VARCHAR):
         """The equivalent Python type."""
         return str
 
-    def literal_processor(self, dialect) -> Callable[[Any], str]:
-        """Process literal binds."""
-        return lambda item: "".join(("'", str(item).strip().replace("'", "''"), "'"))
+    def literal_processor(self, dialect) -> Callable[[Any], Optional[str]]:
+        """Process literals."""
 
-    def bind_processor(self, dialect) -> Callable[[Any], bytes]:
-        """Process regular binds."""
-        return lambda item: str(item).strip().encode("ASCII")
+        def process(item: Any) -> str:
+            """Process literal binds."""
+            if any((isinstance(item, sa.sql.elements.Null), item is None)):
+                return None
+
+            return "".join(("'", str(item).strip().replace("'", "''"), "'"))
+
+        return process
+
+    def bind_processor(self, dialect) -> Callable[[Any], Optional[bytes]]:
+        """Process binds."""
+
+        def process(item: Any) -> Optional[bytes]:
+            """Process literal binds."""
+            if any((isinstance(item, sa.sql.elements.Null), item is None)):
+                return None
+
+            return str(item).strip().encode("ASCII")
+
+        return process
 
     def result_processor(self, dialect, coltype) -> Callable[[Any], str]:
         """Process query results."""
@@ -237,13 +269,29 @@ class Char(sa.types.CHAR):
         """The equivalent Python type."""
         return str
 
-    def literal_processor(self, dialect) -> Callable[[Any], str]:
-        """Process literal binds."""
-        return lambda item: "".join(("'", str(item).strip().replace("'", "''"), "'"))
+    def literal_processor(self, dialect) -> Callable[[Any], Optional[str]]:
+        """Process literals."""
 
-    def bind_processor(self, dialect) -> Callable[[Any], bytes]:
-        """Process regular binds."""
-        return lambda item: str(item).strip().encode("ASCII")
+        def process(item: Any) -> str:
+            """Process literal binds."""
+            if any((isinstance(item, sa.sql.elements.Null), item is None)):
+                return None
+
+            return "".join(("'", str(item).strip().replace("'", "''"), "'"))
+
+        return process
+
+    def bind_processor(self, dialect) -> Callable[[Any], Optional[bytes]]:
+        """Process binds."""
+
+        def process(item: Any) -> Optional[bytes]:
+            """Process literal binds."""
+            if any((isinstance(item, sa.sql.elements.Null), item is None)):
+                return None
+
+            return str(item).strip().encode("ASCII")
+
+        return process
 
     def result_processor(self, dialect, coltype) -> Callable[[Any], str]:
         """Process query results."""
@@ -278,26 +326,31 @@ class Decimal(sa.types.DECIMAL):
 
         def process(value) -> str:
             """Process bound parameters."""
+            value = str(value)
             value = apply_precision_and_scale(
-                "".join(filter(lambda x: x in f".{digits}", str(value))), self.precision, self.scale
+                "".join(filter(lambda x: x in f".{digits}", value)), self.precision, self.scale
             )
-
+            if (value or " ")[0] == "-":
+                value = f"-{value}"
             if value:
                 return str(PyDecimal(value))
             return "NULL"
 
         return process
 
-    def bind_processor(self, dialect, **kwargs) -> Callable[[Any], Optional[PyDecimal]]:
+    def bind_processor(self, dialect, **kwargs) -> Callable[[Any], Optional[float]]:
         """Process binds."""
 
-        def process(value) -> Optional[PyDecimal]:
+        def process(value) -> Optional[float]:
             """Process bound parameters."""
+            value = str(value)
             value = apply_precision_and_scale(
-                "".join(filter(lambda x: x in f".{digits}", str(value))), self.precision, self.scale
+                "".join(filter(lambda x: x in f".{digits}", value)), self.precision, self.scale
             )
+            if (value or " ")[0] == "-":
+                value = f"-{value}"
             if value:
-                return PyDecimal(value)
+                return float(value)
             return None
 
         return process
@@ -307,10 +360,15 @@ class Decimal(sa.types.DECIMAL):
 
         def process(value) -> Optional[PyDecimal]:
             """Process bound parameters."""
-            value = apply_precision_and_scale(
-                "".join(filter(lambda x: x in f".{digits}", str(value))), self.precision, self.scale
-            )
+            if isinstance(value, PyDecimal):
+                return value
 
+            value = str(value)
+            value = apply_precision_and_scale(
+                "".join(filter(lambda x: x in f".{digits}", value)), self.precision, self.scale
+            )
+            if (value or " ")[0] == "-":
+                value = f"-{value}"
             if value:
                 return PyDecimal(value)
             return None
@@ -337,9 +395,12 @@ class DoublePrecision(sa.types.FLOAT):
 
         def process(value) -> str:
             """Process bound parameters."""
+            value = str(value)
             value = apply_precision_and_scale(
-                "".join(filter(lambda x: x in f".{digits}", str(value))), self.precision, self.scale
+                "".join(filter(lambda x: x in f".{digits}", value)), self.precision, self.scale
             )
+            if (value or " ")[0] == "-":
+                value = f"-{value}"
 
             if value:
                 return str(float(value))
@@ -352,9 +413,12 @@ class DoublePrecision(sa.types.FLOAT):
 
         def process(value) -> Optional[float]:
             """Process bound parameters."""
+            value = str(value)
             value = apply_precision_and_scale(
-                "".join(filter(lambda x: x in f".{digits}", str(value))), self.precision, self.scale
+                "".join(filter(lambda x: x in f".{digits}", value)), self.precision, self.scale
             )
+            if (value or " ")[0] == "-":
+                value = f"-{value}"
             if value:
                 return float(value)
             return None
@@ -366,9 +430,20 @@ class DoublePrecision(sa.types.FLOAT):
 
         def process(value) -> Optional[float]:
             """Process bound parameters."""
+            if isinstance(value, float):
+                return value
+
+            if isinstance(value, PyDecimal):
+                return float(value)
+
+            value = str(value)
+
             value = apply_precision_and_scale(
-                "".join(filter(lambda x: x in f".{digits}", str(value))), self.precision, self.scale
+                "".join(filter(lambda x: x in f".{digits}", value)), self.precision, self.scale
             )
+
+            if (value or " ")[0] == "-":
+                value = f"-{value}"
 
             if value:
                 return float(value)
@@ -396,20 +471,51 @@ class Integer(sa.types.INTEGER):
 
     def literal_processor(self, dialect) -> Callable[[Any], str]:
         """Process literal binds."""
-        return lambda item: "".join(takewhile(lambda y: y != ".", filter(lambda x: x in f".{digits}", str(item))))
+
+        def process(item: Any) -> int:
+            """Process the supplied item."""
+            item = str(item)
+            ret_val = "".join(takewhile(lambda y: y != ".", filter(lambda x: x in f".{digits}", item)))
+            if item[0] == "-":
+                ret_val = f"-{ret_val}"
+            return int(ret_val)
+
+        return process
 
     def bind_processor(self, dialect) -> Callable[[Any], int]:
         """Process binds."""
-        return lambda item: int(
-            "".join(takewhile(lambda y: y != ".", filter(lambda x: x in f".{digits}", str(item))))
-        )
+
+        def process(item: Any) -> int:
+            """Process the supplied item."""
+            item = str(item)
+            ret_val = "".join(takewhile(lambda y: y != ".", filter(lambda x: x in f".{digits}", item)))
+            if item[0] == "-":
+                ret_val = f"-{ret_val}"
+            return int(ret_val)
+
+        return process
 
     def result_processor(self, dialect, coltype) -> Callable[[Any], int]:
         """Process query results."""
-        return lambda item: int(
-            "".join(takewhile(lambda y: y != ".", filter(lambda x: x in f".{digits}", str(item))))
-        )
 
+        def process(value: Any) -> int:
+            """Process the supplied item."""
+            if isinstance(value, int):
+                return value
+
+            if isinstance(value, PyDecimal):
+                value = float(value)
+
+            if isinstance(value, float):
+                return int(value)
+
+            value = str(value)
+            ret_val = "".join(takewhile(lambda y: y != ".", filter(lambda x: x in f".{digits}", value)))
+            if value[0] == "-":
+                ret_val = f"-{ret_val}"
+            return int(ret_val)
+
+        return process
 
 Int = Integer
 
@@ -537,22 +643,42 @@ class BigInt(sa.types.BIGINT):
 
     def literal_processor(self, dialect) -> Callable[[Any], str]:
         """Process literals."""
-        return lambda item: "".join(
-            ("'", "".join(takewhile(lambda y: y != ".", filter(lambda x: x in str(digits + "."), str(item)))), "'")
-        )
+
+        def process(item: Any) -> str:
+            """Process the supplied item."""
+            item = str(item)
+            ret_val = "".join(takewhile(lambda y: y != ".", filter(lambda x: x in f".{digits}", item)))
+            if item[0] == "-":
+                ret_val = f"-{ret_val}"
+            return f"'ret_val'"
+
+        return process
 
     def bind_processor(self, dialect) -> Callable[[Any], bytes]:
         """Process binds."""
-        return lambda item: "".join(
-            takewhile(lambda y: y != ".", filter(lambda x: x in str(digits + "."), str(item)))
-        ).encode("ASCII")
+
+        def process(item: Any) -> bytes:
+            """Process the supplied item."""
+            item = str(item)
+            ret_val = "".join(takewhile(lambda y: y != ".", filter(lambda x: x in f".{digits}", item)))
+            if item[0] == "-":
+                ret_val = f"-{ret_val}"
+            return f"'ret_val'".encode("ASCII")
+
+        return process
 
     def result_processor(self, dialect, coltype) -> Callable[[Any], int]:
         """Process query results."""
 
-        return lambda item: int(
-            "".join(takewhile(lambda y: y != ".", filter(lambda x: x in f".{digits}", str(item)))) or 0
-        )
+        def process(item: Any) -> int:
+            """Process the supplied item."""
+            item = str(item)
+            ret_val = "".join(takewhile(lambda y: y != ".", filter(lambda x: x in f".{digits}", item)))
+            if item[0] == "-":
+                ret_val = f"-{ret_val}"
+            return int(ret_val)
+
+        return process
 
 
 # noinspection PyArgumentList,PyUnresolvedReferences
@@ -662,10 +788,13 @@ class Numeric(sa.Numeric):
 
         def process(value) -> str:
             """Process literal parameters."""
-            value = apply_precision_and_scale(
-                "".join(filter(lambda x: x in f".{digits}", str(value))), self.precision, self.scale
-            )
+            value = str(value)
 
+            value = apply_precision_and_scale(
+                "".join(filter(lambda x: x in f".{digits}", value)), self.precision, self.scale
+            )
+            if (value or " ")[0] == "-":
+                value = f"-{value}"
             if value:
                 return str(self.python_type(value))
             return "NULL"
@@ -677,10 +806,12 @@ class Numeric(sa.Numeric):
 
         def process(value) -> Optional[Union[int, float, PyDecimal, bytes]]:
             """Process bound parameters."""
+            value = str(value)
             value = apply_precision_and_scale(
-                "".join(filter(lambda x: x in f".{digits}", str(value))), self.precision, self.scale
+                "".join(filter(lambda x: x in f".{digits}", value)), self.precision, self.scale
             )
-
+            if (value or " ")[0] == "-":
+                value = f"-{value}"
             if value:
                 if self.python_type is int and int(self.precision or 1) > 14:
                     return str(value).encode("ASCII")
@@ -694,10 +825,12 @@ class Numeric(sa.Numeric):
 
         def process(value) -> Optional[Union[int, float, PyDecimal]]:
             """Process bound parameters."""
+            value = str(value)
             value = apply_precision_and_scale(
-                "".join(filter(lambda x: x in f".{digits}", str(value))), self.precision, self.scale
+                "".join(filter(lambda x: x in f".{digits}", value)), self.precision, self.scale
             )
-
+            if (value or " ")[0] == "-":
+                value = f"-{value}"
             if value:
                 return self.python_type(value)
             return None
@@ -1397,11 +1530,19 @@ class DataflexIdentifierPreparer(IdentifierPreparer):
     def format_label(self, label, name=None) -> str:
         """Insert DocString Here."""
         ret_val = super(DataflexIdentifierPreparer, self).format_label(label, name)
+        # try:
+        #     table = getattr(label.element, "table", None)
+        #     if hasattr(label.element, "base_columns"):
+        #         table = getattr(next(iter(label.element.base_columns)), "table", None)
+        #     ret_val = f'"{table.fullname}"."{label.element.name}"'
+        # except AttributeError:
+        #     pass
         return ret_val
 
     def format_alias(self, alias, name=None) -> str:
         """Insert DocString Here."""
         ret_val = super(DataflexIdentifierPreparer, self).format_alias(alias, name)
+        # ret_val = f'"{alias.original.fullname}"'
         return ret_val
 
     def format_savepoint(self, savepoint, name=None) -> str:
@@ -1651,12 +1792,14 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
     operators = sa.sql.compiler.OPERATORS.copy()
     operators[sa.sql.compiler.operators.collate] = ""
     operators[sa.sql.compiler.operators.concat_op] = " + "
+    operators[sa.sql.compiler.operators.ne] = " <> "
 
     supported_functions = {
         # String Functions
         "ASCII",
         "CHAR",
         "CONCAT",
+        "CONVERT",
         "DIFFERENCE",
         "INSERT",
         "LCASE",
@@ -1753,6 +1896,10 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
         "SQL_TYPE_TIMESTAMP",
     }
 
+    scalar_functions = {
+        "COUNT",
+    }
+
     insert_single_values_expr: Any
 
     def _render_string_type(self, type_, name):
@@ -1791,6 +1938,33 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
         if any((self.preparer._requires_quotes_illegal_chars(tok), isinstance(name, sa.sql.elements.quoted_name))):
             tok = self.preparer.quote(tok)
         return tok
+
+    def _compose_select_body(
+        self,
+        text,
+        select,
+        inner_columns,
+        froms,
+        byfrom,
+        kwargs,
+    ):
+        ret_val = super(DataflexCompiler, self)._compose_select_body(
+            text, select, inner_columns, froms, byfrom, kwargs
+        )
+
+        if all(
+            (
+                not kwargs.get("dont_mind_me", False),
+                len(froms) == 1,
+                isinstance(next(iter(froms), None), sa.sql.selectable.Select),
+            )
+        ):
+            kwargs.update({"dont_mind_me": True})
+            compiled = next(iter(froms), None).compile(dialect=self.dialect, compile_kwargs=kwargs).string
+            if "FROM (SELECT" in ret_val and "FROM (SELECT" not in compiled:
+                ret_val = f"{text} {compiled[compiled.find(' ') + 1:]}"
+
+        return ret_val
 
     def get_select_precolumns(self, select, **kw):
         """FlexODBC uses TOP, similar to MS Access."""
@@ -1940,7 +2114,9 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
         func_name = self.function_remaps.get(func.name.upper(), func.name.upper()).upper()
         toks = [self._quote_tok(name=func_name, tok=tok) for tok in func.packagenames]
 
-        if func_name in self.supported_functions:
+        if func_name.upper() in self.scalar_functions:
+            func_name = f"{func_name}(%(expr)s)"
+        elif func_name in self.supported_functions:
             func_name = "".join(("{fn ", func_name, "(%(expr)s)}"))
         else:
             func_name += "(%(expr)s)"
@@ -1989,6 +2165,7 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
             )
             operator = self.operators[sa.sql.compiler.operators.as_]
             formatted_label = self.preparer.format_label(label, label_name)
+            # ret_val = self.preparer.format_label(label, label_name)
 
             ret_val = "".join((element, operator, formatted_label))
         elif render_label_only:
@@ -2231,8 +2408,8 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
     def visit_join(self, join, asfrom=False, **kwargs):
         """Emit properly formatted JOIN clauses."""
 
-        left = join.left._compiler_dispatch(self, asfrom=True, **kwargs)
-        right = join.right._compiler_dispatch(self, asfrom=True, **kwargs)
+        left = join.left._compiler_dispatch(self, asfrom=asfrom, **kwargs)
+        right = join.right._compiler_dispatch(self, asfrom=asfrom, **kwargs)
         on_clause = join.onclause._compiler_dispatch(self, **kwargs)
 
         # FlexODBC supported `JOIN` syntax:
@@ -2246,7 +2423,13 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
         join_type = "INNER JOIN "
 
         if join.full or join.isouter:
-            join_type = " LEFT OUTER JOIN "
+            join_type = "LEFT OUTER JOIN"
+
+        if isinstance(join.left, sa.orm.util._ORMJoin):
+            left = f"({left})"
+
+        if isinstance(join.right, sa.orm.util._ORMJoin):
+            right = f"({right})"
 
         ret_val = f"{left} {join_type} {right} ON {on_clause}"
 
@@ -2426,7 +2609,10 @@ class DataflexCompiler(SQLCompiler):  # sa.sql.compiler.
 
     def process(self, obj: Any, **kwargs: Any) -> str:
         """Process the supplied object."""
+        # self.statement.use_labels = False
+        # obj.use_labels = False
         ret_val = obj._compiler_dispatch(self, **kwargs)
+
         return ret_val
 
 
