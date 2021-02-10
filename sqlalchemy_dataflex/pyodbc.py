@@ -135,15 +135,11 @@ class DataflexDialect_pyodbc(PyODBCConnector, DataflexDialect):
 
         conn_args = {
             "autocommit": True,
-            "driver": "{DataFlex Driver}",
+            "Driver": "{DataFlex Driver}",
             "DataPath": "C:\\DataFlexData",
-            "ReadOnly": "N",
             "UseSimulatedTransactions": "Y",
-            "YearDigits": "4",
             "ConvertToLongVARCHAR": "Y",
-            "ReturnEmptyStringsAsNULLs": "Y",
-            "UseODBCCompatibility": "Y",
-            "DisplayRecnum": "Y",
+            "ReturnEmptyStringsAsNULLs": "N",
         }
 
         opts = url.translate_connect_args()
@@ -171,17 +167,13 @@ class DataflexDialect_pyodbc(PyODBCConnector, DataflexDialect):
                 for key, value in self.arg_name_map.items()
             }
 
-            conn_args.update(supplied_args)
-
-        if cg(conn_args, "driver", cg(conn_args, "drv", None)) is not None:
-            conn_args["Driver"] = str(cg(conn_args, "driver", cg(conn_args, "drv", "{DataFlex Driver}")))
-        else:
-            conn_args["Driver"] = "{DataFlex Driver}"
-
-        if cg(conn_args, "autocommit", cg(conn_args, "ac", None)) is not None:
-            conn_args["autocommit"] = strtobool(cg(conn_args, "autocommit", cg(conn_args, "ac", True)))
-        else:
-            conn_args["autocommit"] = True
+            conn_args.update(
+                {
+                    "DSN": cg(supplied_args, "dsn"),
+                    "autocommit": strtobool(cg(conn_args, "autocommit", cg(conn_args, "ac", True))),
+                    "DBQ": cg(supplied_args, "DataPath", cg(supplied_args, "DBQ", conn_args.get("DataPath")))
+                }
+            )
 
         ret_val = (
             [],
@@ -202,14 +194,14 @@ class DataflexDialect_pyodbc(PyODBCConnector, DataflexDialect):
     def connect(self, *args: Any, **kwargs: Any):
         """Establish a connection using pyodbc."""
 
+        driver = cg(kwargs, "driver", "{DataFlex Driver}")
+        autocommit = cg(kwargs, "autocommit", True)
+
         if cg(kwargs, "dsn", cg(kwargs, "DataSourceName", False)):
             return self.dbapi.connect(
                 f"DSN={cg(kwargs, 'dsn', cg(kwargs, 'DataSourceName', ''))}",
-                autocommit=cg(kwargs, "autocommit", cg(kwargs, "ac", False)),
+                autocommit=autocommit,
             )
-
-        driver = cg(kwargs, "driver", "{DataFlex Driver}")
-        autocommit = cg(kwargs, "autocommit", True)
 
         conn_string = ";".join(
             (
