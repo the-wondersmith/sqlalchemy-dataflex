@@ -137,12 +137,10 @@ class DataflexDialect_pyodbc(PyODBCConnector, DataflexDialect):
             "autocommit": True,
             "driver": "{DataFlex Driver}",
             "DataPath": "C:\\DataFlexData",
-            "CollateCFGPath": Path(r"C:\PROGRA~2\FLEXOD~1").resolve(),
             "ReadOnly": "N",
             "UseSimulatedTransactions": "Y",
             "YearDigits": "4",
             "ConvertToLongVARCHAR": "Y",
-            "DecimalOption": ",",
             "ReturnEmptyStringsAsNULLs": "Y",
             "UseODBCCompatibility": "Y",
             "DisplayRecnum": "Y",
@@ -154,7 +152,7 @@ class DataflexDialect_pyodbc(PyODBCConnector, DataflexDialect):
             opts = dict()
             opts["host"] = url.host or url.query.get("odbc_connect", "")
 
-        if cg(opts, "host", False) and cl_in("odbc_connect", cg(opts, "host", "")):
+        if cg(opts, "host", False):
             supplied_args = {
                 pair[0]: pair[1]
                 for pair in map(
@@ -190,15 +188,19 @@ class DataflexDialect_pyodbc(PyODBCConnector, DataflexDialect):
             {
                 key: value
                 for key, value in conn_args.items()
-                if all((any((cl_in(key, self.arg_name_map.keys()), cl_in(key, self.arg_name_map.values()))), value is not None))
+                if all(
+                    (
+                        any((cl_in(key, self.arg_name_map.keys()), cl_in(key, self.arg_name_map.values()))),
+                        value is not None,
+                    )
+                )
             },
         )
 
         return ret_val
 
     def connect(self, *args: Any, **kwargs: Any):
-        """Establish a connection using pyodbc.
-        """
+        """Establish a connection using pyodbc."""
 
         if cg(kwargs, "dsn", cg(kwargs, "DataSourceName", False)):
             return self.dbapi.connect(
